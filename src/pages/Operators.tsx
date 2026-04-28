@@ -1,0 +1,139 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { PageHeader } from "@/components/PageHeader";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, Plus, FileCheck } from "lucide-react";
+import { format } from "date-fns";
+import { toast } from "sonner";
+
+export default function Operators() {
+  const { user } = useAuth();
+  const [ops, setOps] = useState<any[]>([]);
+  const [audits, setAudits] = useState<Record<string, any[]>>({});
+  const [filter, setFilter] = useState("all");
+  const [auditOpen, setAuditOpen] = useState<string | null>(null);
+  const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
+
+  async function load() {
+    const [{ data: o }, { data: a }] = await Promise.all([
+      supabase.from("operators").select("*").order("name"),
+      supabase.from("audits").select("*").order("audit_date", { ascending: false }),
+    ]);
+    setOps(o ?? []);
+    const map: Record<string, any[]> = {};
+    (a ?? []).forEach((x: any) => { (map[x.operator_id] ??= []).push(x); });
+    setAudits(map);
+  }
+  useEffect(() => { load(); }, []);
+
+  async function createAudit(operator_id: string) {
+    if (!user) return;
+    const { error } = await supabase.from("audits").insert({
+      operator_id, framework: form.framework as any, score: form.score,
+      findings: form.findings || null, remediation_plan: form.remediation_plan || null,
+      auditor_id: user.id,
+    });
+    if (error) return toast.error(error.message);
+    await supabase.from("operators").update({ compliance_score: form.score }).eq("id", operator_id);
+    toast.success("Audit enregistré");
+    setAuditOpen(null);
+    setForm({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
+    load();
+  }
+
+  const filtered = filter === "all" ? ops : ops.filter(o => o.type === filter);
+
+  function scoreColor(s: number) {
+    if (s >= 80) return "text-success";
+    if (s >= 60) return "text-warning";
+    return "text-destructive";
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Opérateurs & Audits de conformité" description={`${ops.length} entités · Référentiels ISO 27001 / NIST CSF / ARPT`} />
+
+      <div className="flex gap-2">
+        {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
+          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
+        ))}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {filtered.map(o => {
+          const oas = audits[o.id] ?? [];
+          return (
+            <Card key={o.id} className="p-5 gradient-card hover:border-primary/40 transition-smooth">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold truncate">{o.name}</h3>
+                  <div className="flex gap-2 mt-1">
+                    <Badge variant="outline" className="text-[10px]">{o.type === "telecom" ? "Télécom" : "ISP"}</Badge>
+                    {o.region && <Badge variant="secondary" className="text-[10px]">{o.region}</Badge>}
+                  </div>
+                </div>
+              </div>
+              <div className="mb-3">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-muted-foreground">Score conformité</span>
+                  <span className={`font-bold ${scoreColor(o.compliance_score ?? 0)}`}>{o.compliance_score ?? 0}/100</span>
+                </div>
+                <Progress value={o.compliance_score ?? 0} className="h-2" />
+              </div>
+              <div className="text-xs text-muted-foreground mb-3">
+                {oas.length} audit(s) · Dernier: {oas[0] ? format(new Date(oas[0].audit_date), "dd/MM/yyyy") : "—"}
+              </div>
+              <Dialog open={auditOpen === o.id} onOpenChange={v => setAuditOpen(v ? o.id : null)}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline" className="w-full"><FileCheck className="h-3 w-3 mr-2" />Nouvel audit</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader><DialogTitle>Audit — {o.name}</DialogTitle></DialogHeader>
+                  <div className="space-y-3">
+                    <div><Label>Référentiel</Label>
+                      <Select value={form.framework} onValueChange={v => setForm({ ...form, framework: v })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="ISO27001">ISO 27001</SelectItem>
+                          <SelectItem value="NIST">NIST CSF</SelectItem>
+                          <SelectItem value="ARPT">ARPT Guinée</SelectItem>
+                          <SelectItem value="PCI_DSS">PCI DSS</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div><Label>Score (0-100)</Label><Input type="number" min={0} max={100} value={form.score} onChange={e => setForm({ ...form, score: +e.target.value })} /></div>
+                    <div><Label>Constats</Label><Textarea value={form.findings} onChange={e => setForm({ ...form, findings: e.target.value })} /></div>
+                    <div><Label>Plan de remédiation</Label><Textarea value={form.remediation_plan} onChange={e => setForm({ ...form, remediation_plan: e.target.value })} /></div>
+                    <Button onClick={() => createAudit(o.id)} className="w-full">Enregistrer l'audit</Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              {oas.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border space-y-1">
+                  {oas.slice(0, 2).map(a => (
+                    <div key={a.id} className="text-xs flex justify-between">
+                      <span>{a.framework} — {format(new Date(a.audit_date), "dd/MM/yy")}</span>
+                      <span className={scoreColor(a.score)}>{a.score}/100</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
