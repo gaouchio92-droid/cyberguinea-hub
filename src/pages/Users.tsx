@@ -6,10 +6,22 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Shield, ShieldOff, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Shield, ShieldOff, UserCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { z } from "zod";
+
+const newUserSchema = z.object({
+  full_name: z.string().trim().min(1, "Nom requis").max(100),
+  email: z.string().trim().toLowerCase().email("Email invalide").max(255),
+  password: z.string().min(8, "Min. 8 caractères").max(128),
+  role: z.enum(["admin", "analyst"]),
+});
 
 type Row = { id: string; full_name: string | null; created_at: string; roles: string[] };
 
@@ -54,7 +66,11 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Gestion des utilisateurs" description="Administration des comptes et rôles — réservé aux administrateurs" />
+      <PageHeader
+        title="Gestion des utilisateurs"
+        description="Administration des comptes et rôles — réservé aux administrateurs"
+        action={<NewUserDialog onCreated={load} />}
+      />
       <Card className="p-5 gradient-card">
         {loading ? (
           <div className="flex items-center justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
@@ -93,5 +109,59 @@ export default function Users() {
         )}
       </Card>
     </div>
+  );
+}
+
+function NewUserDialog({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ full_name: "", email: "", password: "", role: "analyst" as "admin" | "analyst" });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const parsed = newUserSchema.safeParse(form);
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-create-user", { body: parsed.data });
+    setBusy(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error ?? error?.message ?? "Erreur");
+    toast.success("Utilisateur créé");
+    setForm({ full_name: "", email: "", password: "", role: "analyst" });
+    setOpen(false);
+    onCreated();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button><UserPlus className="h-4 w-4" /> Nouvel utilisateur</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Créer un utilisateur</DialogTitle></DialogHeader>
+        <form onSubmit={submit} className="space-y-4">
+          <div><Label>Nom complet</Label><Input maxLength={100} required value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} /></div>
+          <div><Label>Email</Label><Input type="email" maxLength={255} required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+          <div>
+            <Label>Mot de passe initial</Label>
+            <Input type="text" minLength={8} maxLength={128} required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+            <p className="text-[11px] text-muted-foreground mt-1">Communiquez-le à l'utilisateur, il pourra le changer après connexion.</p>
+          </div>
+          <div>
+            <Label>Rôle</Label>
+            <Select value={form.role} onValueChange={(v: "admin" | "analyst") => setForm({ ...form, role: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="analyst">Analyste</SelectItem>
+                <SelectItem value="admin">Administrateur</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button disabled={busy}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Créer</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
