@@ -157,6 +157,7 @@ function NewUserDialog({ onCreated }: { onCreated: () => void }) {
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="analyst">Analyste</SelectItem>
+                <SelectItem value="operator">Opérateur</SelectItem>
                 <SelectItem value="admin">Administrateur</SelectItem>
               </SelectContent>
             </Select>
