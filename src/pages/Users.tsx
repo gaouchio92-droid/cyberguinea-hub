@@ -20,7 +20,7 @@ const newUserSchema = z.object({
   full_name: z.string().trim().min(1, "Nom requis").max(100),
   email: z.string().trim().toLowerCase().email("Email invalide").max(255),
   password: z.string().min(8, "Min. 8 caractères").max(128),
-  role: z.enum(["admin", "analyst"]),
+  role: z.enum(["admin", "analyst", "operator"]),
 });
 
 type Row = { id: string; full_name: string | null; created_at: string; roles: string[] };
@@ -49,7 +49,7 @@ export default function Users() {
   if (authLoading) return null;
   if (!isAdmin) return <Navigate to="/" replace />;
 
-  async function toggleRole(userId: string, role: "admin" | "analyst", has: boolean) {
+  async function toggleRole(userId: string, role: "admin" | "analyst" | "operator", has: boolean) {
     if (has) {
       if (userId === user?.id && role === "admin") {
         if (!confirm("Retirer votre propre rôle administrateur ?")) return;
@@ -79,6 +79,7 @@ export default function Users() {
             {rows.map(r => {
               const isA = r.roles.includes("admin");
               const isAn = r.roles.includes("analyst");
+              const isOp = r.roles.includes("operator");
               return (
                 <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-smooth">
                   <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shrink-0">
@@ -91,14 +92,18 @@ export default function Users() {
                   <div className="flex flex-wrap gap-2">
                     {isA && <Badge className="bg-primary/15 text-primary border-primary/30">Administrateur</Badge>}
                     {isAn && <Badge variant="outline">Analyste</Badge>}
-                    {!isA && !isAn && <Badge variant="outline" className="text-muted-foreground">Aucun rôle</Badge>}
+                    {isOp && <Badge className="bg-secondary/15 text-secondary border-secondary/30">Opérateur</Badge>}
+                    {!isA && !isAn && !isOp && <Badge variant="outline" className="text-muted-foreground">Aucun rôle</Badge>}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button size="sm" variant={isA ? "destructive" : "default"} onClick={() => toggleRole(r.id, "admin", isA)}>
-                      {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Promouvoir admin</>}
+                      {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Admin</>}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "analyst", isAn)}>
-                      {isAn ? "Retirer analyste" : "Ajouter analyste"}
+                      {isAn ? "Retirer analyste" : "Analyste"}
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "operator", isOp)}>
+                      {isOp ? "Retirer opérateur" : "Opérateur"}
                     </Button>
                   </div>
                 </div>
