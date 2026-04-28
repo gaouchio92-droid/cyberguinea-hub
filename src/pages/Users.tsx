@@ -66,7 +66,11 @@ export default function Users() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Gestion des utilisateurs" description="Administration des comptes et rôles — réservé aux administrateurs" />
+      <PageHeader
+        title="Gestion des utilisateurs"
+        description="Administration des comptes et rôles — réservé aux administrateurs"
+        action={<NewUserDialog onCreated={load} />}
+      />
       <Card className="p-5 gradient-card">
         {loading ? (
           <div className="flex items-center justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
