@@ -111,3 +111,57 @@ export default function Users() {
     </div>
   );
 }
+
+function NewUserDialog({ onCreated }: { onCreated: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [form, setForm] = useState({ full_name: "", email: "", password: "", role: "analyst" as "admin" | "analyst" });
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const parsed = newUserSchema.safeParse(form);
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    setBusy(true);
+    const { data, error } = await supabase.functions.invoke("admin-create-user", { body: parsed.data });
+    setBusy(false);
+    if (error || (data as any)?.error) return toast.error((data as any)?.error ?? error?.message ?? "Erreur");
+    toast.success("Utilisateur créé");
+    setForm({ full_name: "", email: "", password: "", role: "analyst" });
+    setOpen(false);
+    onCreated();
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button><UserPlus className="h-4 w-4" /> Nouvel utilisateur</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Créer un utilisateur</DialogTitle></DialogHeader>
+        <form onSubmit={submit} className="space-y-4">
+          <div><Label>Nom complet</Label><Input maxLength={100} required value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })} /></div>
+          <div><Label>Email</Label><Input type="email" maxLength={255} required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+          <div>
+            <Label>Mot de passe initial</Label>
+            <Input type="text" minLength={8} maxLength={128} required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+            <p className="text-[11px] text-muted-foreground mt-1">Communiquez-le à l'utilisateur, il pourra le changer après connexion.</p>
+          </div>
+          <div>
+            <Label>Rôle</Label>
+            <Select value={form.role} onValueChange={(v: "admin" | "analyst") => setForm({ ...form, role: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="analyst">Analyste</SelectItem>
+                <SelectItem value="admin">Administrateur</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Annuler</Button>
+            <Button disabled={busy}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Créer</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
