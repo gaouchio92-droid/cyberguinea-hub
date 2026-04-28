@@ -362,7 +362,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "analyst"
+      app_role: "admin" | "analyst" | "operator"
       audit_framework: "ISO27001" | "NIST" | "ARPT" | "PCI_DSS"
       incident_status:
         | "open"
@@ -515,7 +515,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "analyst"],
+      app_role: ["admin", "analyst", "operator"],
       audit_framework: ["ISO27001", "NIST", "ARPT", "PCI_DSS"],
       incident_status: [
         "open",
