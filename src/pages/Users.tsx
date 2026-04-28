@@ -6,10 +6,22 @@ import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Shield, ShieldOff, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2, Shield, ShieldOff, UserCheck, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { z } from "zod";
+
+const newUserSchema = z.object({
+  full_name: z.string().trim().min(1, "Nom requis").max(100),
+  email: z.string().trim().toLowerCase().email("Email invalide").max(255),
+  password: z.string().min(8, "Min. 8 caractères").max(128),
+  role: z.enum(["admin", "analyst"]),
+});
 
 type Row = { id: string; full_name: string | null; created_at: string; roles: string[] };
 
