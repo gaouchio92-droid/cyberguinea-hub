@@ -14,16 +14,380 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audits: {
+        Row: {
+          audit_date: string
+          auditor_id: string | null
+          created_at: string
+          findings: string | null
+          framework: Database["public"]["Enums"]["audit_framework"]
+          id: string
+          operator_id: string
+          remediation_plan: string | null
+          score: number | null
+        }
+        Insert: {
+          audit_date?: string
+          auditor_id?: string | null
+          created_at?: string
+          findings?: string | null
+          framework: Database["public"]["Enums"]["audit_framework"]
+          id?: string
+          operator_id: string
+          remediation_plan?: string | null
+          score?: number | null
+        }
+        Update: {
+          audit_date?: string
+          auditor_id?: string | null
+          created_at?: string
+          findings?: string | null
+          framework?: Database["public"]["Enums"]["audit_framework"]
+          id?: string
+          operator_id?: string
+          remediation_plan?: string | null
+          score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audits_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          detected_at: string
+          id: string
+          notes: string | null
+          operator_id: string | null
+          owner_id: string | null
+          resolved_at: string | null
+          severity: Database["public"]["Enums"]["severity"]
+          status: Database["public"]["Enums"]["incident_status"]
+          timeline: Json | null
+          title: string
+          type: Database["public"]["Enums"]["incident_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          detected_at?: string
+          id?: string
+          notes?: string | null
+          operator_id?: string | null
+          owner_id?: string | null
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["severity"]
+          status?: Database["public"]["Enums"]["incident_status"]
+          timeline?: Json | null
+          title: string
+          type: Database["public"]["Enums"]["incident_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          detected_at?: string
+          id?: string
+          notes?: string | null
+          operator_id?: string | null
+          owner_id?: string | null
+          resolved_at?: string | null
+          severity?: Database["public"]["Enums"]["severity"]
+          status?: Database["public"]["Enums"]["incident_status"]
+          timeline?: Json | null
+          title?: string
+          type?: Database["public"]["Enums"]["incident_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incidents_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      intel_items: {
+        Row: {
+          category: Database["public"]["Enums"]["intel_category"]
+          created_at: string
+          cve_id: string | null
+          description: string | null
+          id: string
+          published_at: string
+          recommendations: string | null
+          region_impact: string | null
+          severity: Database["public"]["Enums"]["severity"]
+          source: string | null
+          title: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["intel_category"]
+          created_at?: string
+          cve_id?: string | null
+          description?: string | null
+          id?: string
+          published_at?: string
+          recommendations?: string | null
+          region_impact?: string | null
+          severity?: Database["public"]["Enums"]["severity"]
+          source?: string | null
+          title: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["intel_category"]
+          created_at?: string
+          cve_id?: string | null
+          description?: string | null
+          id?: string
+          published_at?: string
+          recommendations?: string | null
+          region_impact?: string | null
+          severity?: Database["public"]["Enums"]["severity"]
+          source?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      kpi_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          incidents_open: number | null
+          incidents_resolved: number | null
+          mttd_minutes: number | null
+          mttr_minutes: number | null
+          operator_compliance_avg: number | null
+          snapshot_date: string
+          threat_level: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          incidents_open?: number | null
+          incidents_resolved?: number | null
+          mttd_minutes?: number | null
+          mttr_minutes?: number | null
+          operator_compliance_avg?: number | null
+          snapshot_date?: string
+          threat_level?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          incidents_open?: number | null
+          incidents_resolved?: number | null
+          mttd_minutes?: number | null
+          mttr_minutes?: number | null
+          operator_compliance_avg?: number | null
+          snapshot_date?: string
+          threat_level?: string | null
+        }
+        Relationships: []
+      }
+      operators: {
+        Row: {
+          compliance_score: number | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          region: string | null
+          type: Database["public"]["Enums"]["operator_type"]
+          updated_at: string
+        }
+        Insert: {
+          compliance_score?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          region?: string | null
+          type: Database["public"]["Enums"]["operator_type"]
+          updated_at?: string
+        }
+        Update: {
+          compliance_score?: number | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          region?: string | null
+          type?: Database["public"]["Enums"]["operator_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          content: string | null
+          generated_at: string
+          generated_by: string | null
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["report_type"]
+        }
+        Insert: {
+          content?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          title: string
+          type: Database["public"]["Enums"]["report_type"]
+        }
+        Update: {
+          content?: string | null
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["report_type"]
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "analyst"
+      audit_framework: "ISO27001" | "NIST" | "ARPT" | "PCI_DSS"
+      incident_status:
+        | "open"
+        | "investigating"
+        | "contained"
+        | "resolved"
+        | "closed"
+      incident_type:
+        | "phishing"
+        | "malware"
+        | "ddos"
+        | "account_compromise"
+        | "data_leak"
+        | "other"
+      intel_category:
+        | "cve"
+        | "apt"
+        | "ransomware"
+        | "phishing_campaign"
+        | "other"
+      operator_type: "telecom" | "isp"
+      report_type: "weekly" | "monthly" | "incident" | "audit"
+      severity: "low" | "medium" | "high" | "critical"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status: "todo" | "in_progress" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +514,36 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "analyst"],
+      audit_framework: ["ISO27001", "NIST", "ARPT", "PCI_DSS"],
+      incident_status: [
+        "open",
+        "investigating",
+        "contained",
+        "resolved",
+        "closed",
+      ],
+      incident_type: [
+        "phishing",
+        "malware",
+        "ddos",
+        "account_compromise",
+        "data_leak",
+        "other",
+      ],
+      intel_category: [
+        "cve",
+        "apt",
+        "ransomware",
+        "phishing_campaign",
+        "other",
+      ],
+      operator_type: ["telecom", "isp"],
+      report_type: ["weekly", "monthly", "incident", "audit"],
+      severity: ["low", "medium", "high", "critical"],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: ["todo", "in_progress", "done"],
+    },
   },
 } as const
