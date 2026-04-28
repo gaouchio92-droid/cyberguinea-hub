@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const email = String(body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");
     const fullName = String(body.full_name ?? "").trim().slice(0, 100);
-    const role = body.role === "admin" ? "admin" : "analyst";
+    const role = ["admin", "analyst", "operator"].includes(body.role) ? body.role : "analyst";
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 255) return json({ error: "Email invalide" }, 400);
     if (password.length < 8 || password.length > 128) return json({ error: "Mot de passe : 8 à 128 caractères" }, 400);
@@ -50,10 +50,11 @@ Deno.serve(async (req) => {
     const newId = created.user.id;
 
     // 4. Trigger handle_new_user already inserted profile + analyst role.
-    // Update profile name and add admin role if requested.
+    // Update profile name. If a different role is requested, replace analyst with it.
     await admin.from("profiles").update({ full_name: fullName }).eq("id", newId);
-    if (role === "admin") {
-      await admin.from("user_roles").insert({ user_id: newId, role: "admin" });
+    if (role !== "analyst") {
+      await admin.from("user_roles").delete().eq("user_id", newId).eq("role", "analyst");
+      await admin.from("user_roles").insert({ user_id: newId, role });
     }
 
     return json({ success: true, user_id: newId });
