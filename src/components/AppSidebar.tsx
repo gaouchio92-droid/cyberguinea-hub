@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, Shield, LogOut,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import arptLogo from "@/assets/arpt-logo.png";
 
 const items = [
   { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
@@ -29,8 +30,8 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center shadow-glow shrink-0">
-            <Shield className="h-5 w-5 text-primary-foreground" />
+          <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 ring-1 ring-primary/30 shadow-glow bg-background/40">
+            <img src={arptLogo} alt="Logo ARPT Guinée CERT National" width={40} height={40} className="w-full h-full object-contain" />
           </div>
           {!collapsed && (
             <div className="min-w-0">
