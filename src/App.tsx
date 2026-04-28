@@ -13,6 +13,8 @@ import Operators from "./pages/Operators";
 import Reports from "./pages/Reports";
 import Assistant from "./pages/Assistant";
 import AuthPage from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route element={<AppLayout />}>
               <Route path="/" element={<Dashboard />} />
               <Route path="/tasks" element={<Tasks />} />
@@ -34,6 +37,7 @@ const App = () => (
               <Route path="/operators" element={<Operators />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/assistant" element={<Assistant />} />
+              <Route path="/users" element={<Users />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

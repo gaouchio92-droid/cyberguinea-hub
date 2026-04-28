@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import arptLogo from "@/assets/arpt-logo.png";
 
-const items = [
+const baseItems = [
   { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
   { title: "Planning & Tâches", url: "/tasks", icon: ListChecks },
   { title: "Incidents", url: "/incidents", icon: ShieldAlert },
@@ -19,12 +19,16 @@ const items = [
   { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
   { title: "Assistant IA", url: "/assistant", icon: Sparkles },
 ];
+const adminItems = [
+  { title: "Utilisateurs", url: "/users", icon: Users },
+];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const { signOut, user, isAdmin } = useAuth();
+  const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
