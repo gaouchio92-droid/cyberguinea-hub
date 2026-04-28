@@ -3,8 +3,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { AuthProvider } from "@/hooks/useAuth";
+import AppLayout from "@/components/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import Tasks from "./pages/Tasks";
+import Incidents from "./pages/Incidents";
+import Intel from "./pages/Intel";
+import Operators from "./pages/Operators";
+import Reports from "./pages/Reports";
+import Assistant from "./pages/Assistant";
+import AuthPage from "./pages/Auth";
+import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -14,11 +23,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/tasks" element={<Tasks />} />
+              <Route path="/incidents" element={<Incidents />} />
+              <Route path="/intel" element={<Intel />} />
+              <Route path="/operators" element={<Operators />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/assistant" element={<Assistant />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
