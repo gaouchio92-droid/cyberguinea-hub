@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 
 export default function Incidents() {
-  const { user } = useAuth();
+  const { user, isAdmin, isAnalyst } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [operators, setOperators] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -139,11 +139,13 @@ export default function Incidents() {
                   <span>📅 {format(new Date(i.detected_at), "dd/MM/yyyy HH:mm")}</span>
                   {i.operators?.name && <span>🏢 {i.operators.name}</span>}
                 </div>
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {Object.entries(incidentStatusLabel).filter(([k]) => k !== i.status).map(([k, v]) => (
-                    <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus)}>→ {v}</Button>
-                  ))}
-                </div>
+                {(isAdmin || isAnalyst || i.created_by === user?.id) && (
+                  <div className="flex flex-wrap gap-1 mt-3">
+                    {Object.entries(incidentStatusLabel).filter(([k]) => k !== i.status).map(([k, v]) => (
+                      <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus)}>→ {v}</Button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </Card>

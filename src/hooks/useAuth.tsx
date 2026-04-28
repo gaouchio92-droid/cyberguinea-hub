@@ -9,6 +9,9 @@ interface AuthCtx {
   roles: AppRole[];
   loading: boolean;
   isAdmin: boolean;
+  isAnalyst: boolean;
+  isOperator: boolean;
+  canWriteIncident: boolean;
   signOut: () => Promise<void>;
 }
 
@@ -49,8 +52,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setRoles([]);
   }
 
+  const isAdmin = roles.includes("admin");
+  const isAnalyst = roles.includes("analyst");
+  const isOperator = roles.includes("operator");
   return (
-    <Ctx.Provider value={{ user, session, roles, loading, isAdmin: roles.includes("admin"), signOut }}>
+    <Ctx.Provider value={{ user, session, roles, loading, isAdmin, isAnalyst, isOperator, canWriteIncident: isAdmin || isAnalyst || isOperator, signOut }}>
       {children}
     </Ctx.Provider>
   );

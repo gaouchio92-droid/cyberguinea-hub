@@ -1,4 +1,9 @@
-export type AppRole = "admin" | "analyst";
+export type AppRole = "admin" | "analyst" | "operator";
+export const roleLabel: Record<AppRole, string> = {
+  admin: "Administrateur",
+  analyst: "Analyste",
+  operator: "Opérateur",
+};
 export type Severity = "low" | "medium" | "high" | "critical";
 export type IncidentStatus = "open" | "investigating" | "contained" | "resolved" | "closed";
 export type IncidentType = "phishing" | "malware" | "ddos" | "account_compromise" | "data_leak" | "other";
