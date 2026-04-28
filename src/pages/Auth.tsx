@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import arptLogo from "@/assets/arpt-logo.png";
 import { toast } from "sonner";
 
 export default function AuthPage() {
@@ -47,10 +48,10 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md p-8 glass shadow-elegant">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-glow mb-3">
-            <Shield className="h-7 w-7 text-primary-foreground" />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-glow mb-3 ring-1 ring-primary/30 bg-background/40">
+            <img src={arptLogo} alt="Logo ARPT Guinée CERT National" width={80} height={80} className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-bold">ARPT Cyber Analyst Pro</h1>
+          <h1 className="text-2xl font-bold text-gradient">ARPT Cyber Analyst Pro</h1>
           <p className="text-sm text-muted-foreground mt-1">CERT Guinée — Plateforme analyste 2026</p>
         </div>
         <Tabs defaultValue="signin">
