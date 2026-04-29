@@ -12,6 +12,7 @@ import Intel from "./pages/Intel";
 import Operators from "./pages/Operators";
 import Reports from "./pages/Reports";
 import Assistant from "./pages/Assistant";
+import Documentation from "./pages/Documentation";
 import AuthPage from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Users from "./pages/Users";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/operators" element={<Operators />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/assistant" element={<Assistant />} />
+              <Route path="/documentation" element={<Documentation />} />
               <Route path="/users" element={<Users />} />
             </Route>
             <Route path="*" element={<NotFound />} />
