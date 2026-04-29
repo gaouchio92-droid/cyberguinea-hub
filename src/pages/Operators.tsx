@@ -11,16 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, FileCheck } from "lucide-react";
+import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
 export default function Operators() {
-  const { user } = useAuth();
+  const { user, isAdmin, isAnalyst } = useAuth();
   const [ops, setOps] = useState<any[]>([]);
   const [audits, setAudits] = useState<Record<string, any[]>>({});
   const [filter, setFilter] = useState("all");
   const [auditOpen, setAuditOpen] = useState<string | null>(null);
+  const [urlDialog, setUrlDialog] = useState<any>(null);
+  const [urlInput, setUrlInput] = useState("");
+  const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
 
   async function load() {
