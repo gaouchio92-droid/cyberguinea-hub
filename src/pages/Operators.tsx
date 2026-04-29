@@ -11,16 +11,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, FileCheck } from "lucide-react";
+import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
 export default function Operators() {
-  const { user } = useAuth();
+  const { user, isAdmin, isAnalyst } = useAuth();
   const [ops, setOps] = useState<any[]>([]);
   const [audits, setAudits] = useState<Record<string, any[]>>({});
   const [filter, setFilter] = useState("all");
   const [auditOpen, setAuditOpen] = useState<string | null>(null);
+  const [urlDialog, setUrlDialog] = useState<any>(null);
+  const [urlInput, setUrlInput] = useState("");
+  const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
 
   async function load() {
@@ -48,6 +51,38 @@ export default function Operators() {
     setAuditOpen(null);
     setForm({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
     load();
+  }
+
+  async function saveUrl() {
+    if (!urlDialog) return;
+    const url = urlInput.trim() || null;
+    if (url && !/^https?:\/\//i.test(url)) return toast.error("URL invalide (http:// ou https://)");
+    const { error } = await supabase.from("operators").update({ source_url: url }).eq("id", urlDialog.id);
+    if (error) return toast.error(error.message);
+    toast.success("URL enregistrée");
+    setUrlDialog(null);
+    setUrlInput("");
+    load();
+  }
+
+  async function syncOperator(op: any) {
+    if (!op.source_url) {
+      setUrlDialog(op);
+      setUrlInput("");
+      return toast.error("Configurez d'abord une URL source");
+    }
+    setSyncing(op.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-operator", { body: { operator_id: op.id } });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success("Opérateur synchronisé");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Échec synchronisation");
+    } finally {
+      setSyncing(null);
+    }
   }
 
   const filtered = filter === "all" ? ops : ops.filter(o => o.type === filter);
@@ -92,9 +127,32 @@ export default function Operators() {
                 </div>
                 <Progress value={o.compliance_score ?? 0} className="h-2" />
               </div>
-              <div className="text-xs text-muted-foreground mb-3">
-                {oas.length} audit(s) · Dernier: {oas[0] ? format(new Date(oas[0].audit_date), "dd/MM/yyyy") : "—"}
+              <div className="text-xs text-muted-foreground mb-3 space-y-1">
+                <div>{oas.length} audit(s) · Dernier: {oas[0] ? format(new Date(oas[0].audit_date), "dd/MM/yyyy") : "—"}</div>
+                {o.source_url && (
+                  <div className="flex items-center gap-1 truncate">
+                    <LinkIcon className="h-3 w-3 shrink-0" />
+                    <a href={o.source_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline truncate">{o.source_url}</a>
+                  </div>
+                )}
+                {o.last_synced_at && <div>🔄 Sync: {format(new Date(o.last_synced_at), "dd/MM/yyyy HH:mm")}</div>}
               </div>
+              {o.last_sync_summary && (
+                <div className="mb-3 p-2 rounded bg-muted/40 border-l-2 border-primary/40 text-xs text-muted-foreground line-clamp-3">
+                  {o.last_sync_summary}
+                </div>
+              )}
+              {(isAdmin || isAnalyst) && (
+                <div className="flex gap-2 mb-2">
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => { setUrlDialog(o); setUrlInput(o.source_url || ""); }}>
+                    <Pencil className="h-3 w-3 mr-1" />URL
+                  </Button>
+                  <Button size="sm" variant="outline" className="flex-1" disabled={syncing === o.id} onClick={() => syncOperator(o)}>
+                    <RefreshCw className={`h-3 w-3 mr-1 ${syncing === o.id ? "animate-spin" : ""}`} />
+                    {syncing === o.id ? "Sync..." : "Synchroniser"}
+                  </Button>
+                </div>
+              )}
               <Dialog open={auditOpen === o.id} onOpenChange={v => setAuditOpen(v ? o.id : null)}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline" className="w-full"><FileCheck className="h-3 w-3 mr-2" />Nouvel audit</Button>
@@ -134,6 +192,30 @@ export default function Operators() {
           );
         })}
       </div>
+
+      <Dialog open={!!urlDialog} onOpenChange={v => !v && setUrlDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Source de synchronisation — {urlDialog?.name}</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>URL du site officiel</Label>
+              <Input
+                type="url"
+                value={urlInput}
+                onChange={e => setUrlInput(e.target.value)}
+                placeholder="https://www.operateur.gn"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Cette URL sera utilisée pour synchroniser automatiquement les informations publiques de l'opérateur (contacts, services, région) via analyse IA.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setUrlDialog(null)} className="flex-1">Annuler</Button>
+              <Button onClick={saveUrl} className="flex-1">Enregistrer</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
