@@ -139,7 +139,7 @@ export default function Incidents() {
                   <span>📅 {format(new Date(i.detected_at), "dd/MM/yyyy HH:mm")}</span>
                   {i.operators?.name && <span>🏢 {i.operators.name}</span>}
                 </div>
-                {(isAdmin || isAnalyst || i.created_by === user?.id) && (
+                {(isAdmin || isAnalyst) && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {Object.entries(incidentStatusLabel).filter(([k]) => k !== i.status).map(([k, v]) => (
                       <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus)}>→ {v}</Button>
