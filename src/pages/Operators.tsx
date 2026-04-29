@@ -53,6 +53,38 @@ export default function Operators() {
     load();
   }
 
+  async function saveUrl() {
+    if (!urlDialog) return;
+    const url = urlInput.trim() || null;
+    if (url && !/^https?:\/\//i.test(url)) return toast.error("URL invalide (http:// ou https://)");
+    const { error } = await supabase.from("operators").update({ source_url: url }).eq("id", urlDialog.id);
+    if (error) return toast.error(error.message);
+    toast.success("URL enregistrée");
+    setUrlDialog(null);
+    setUrlInput("");
+    load();
+  }
+
+  async function syncOperator(op: any) {
+    if (!op.source_url) {
+      setUrlDialog(op);
+      setUrlInput("");
+      return toast.error("Configurez d'abord une URL source");
+    }
+    setSyncing(op.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-operator", { body: { operator_id: op.id } });
+      if (error) throw error;
+      if ((data as any)?.error) throw new Error((data as any).error);
+      toast.success("Opérateur synchronisé");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Échec synchronisation");
+    } finally {
+      setSyncing(null);
+    }
+  }
+
   const filtered = filter === "all" ? ops : ops.filter(o => o.type === filter);
 
   function scoreColor(s: number) {
