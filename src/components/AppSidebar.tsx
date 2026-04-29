@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -18,6 +18,7 @@ const baseItems = [
   { title: "Opérateurs & Audits", url: "/operators", icon: Building2 },
   { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
   { title: "Assistant IA", url: "/assistant", icon: Sparkles },
+  { title: "Documentation", url: "/documentation", icon: BookOpen },
 ];
 const adminItems = [
   { title: "Utilisateurs", url: "/users", icon: Users },
