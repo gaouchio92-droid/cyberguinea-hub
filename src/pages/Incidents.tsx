@@ -21,6 +21,8 @@ export default function Incidents() {
   const [operators, setOperators] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [filter, setFilter] = useState<string>("all");
+  const [closeDialog, setCloseDialog] = useState<any>(null);
+  const [closureComment, setClosureComment] = useState("");
   const [form, setForm] = useState({
     title: "", description: "", type: "phishing" as IncidentType,
     severity: "medium" as Severity, status: "open" as IncidentStatus, operator_id: "", notes: "",
@@ -49,8 +51,33 @@ export default function Incidents() {
     load();
   }
 
-  async function updateStatus(id: string, status: IncidentStatus) {
+  async function updateStatus(id: string, status: IncidentStatus, incident?: any) {
+    if (status === "closed") {
+      if (incident?.status !== "resolved") {
+        toast.error("L'incident doit être résolu avant la clôture");
+        return;
+      }
+      setCloseDialog(incident);
+      setClosureComment("");
+      return;
+    }
     await supabase.from("incidents").update({ status, ...(status === "resolved" ? { resolved_at: new Date().toISOString() } : {}) }).eq("id", id);
+    load();
+  }
+
+  async function confirmClose() {
+    if (!closeDialog || !user) return;
+    if (!closureComment.trim()) return toast.error("Commentaire de clôture requis");
+    const { error } = await supabase.from("incidents").update({
+      status: "closed",
+      closure_comment: closureComment.trim(),
+      closed_at: new Date().toISOString(),
+      closed_by: user.id,
+    }).eq("id", closeDialog.id);
+    if (error) return toast.error(error.message);
+    toast.success("Incident clôturé");
+    setCloseDialog(null);
+    setClosureComment("");
     load();
   }
 
