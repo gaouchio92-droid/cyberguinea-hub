@@ -60,6 +60,9 @@ export type Database = {
       }
       incidents: {
         Row: {
+          closed_at: string | null
+          closed_by: string | null
+          closure_comment: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -77,6 +80,9 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_comment?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -94,6 +100,9 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          closure_comment?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -205,9 +214,12 @@ export type Database = {
           contact_phone: string | null
           created_at: string
           id: string
+          last_sync_summary: string | null
+          last_synced_at: string | null
           name: string
           notes: string | null
           region: string | null
+          source_url: string | null
           type: Database["public"]["Enums"]["operator_type"]
           updated_at: string
         }
@@ -217,9 +229,12 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           id?: string
+          last_sync_summary?: string | null
+          last_synced_at?: string | null
           name: string
           notes?: string | null
           region?: string | null
+          source_url?: string | null
           type: Database["public"]["Enums"]["operator_type"]
           updated_at?: string
         }
@@ -229,9 +244,12 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string
           id?: string
+          last_sync_summary?: string | null
+          last_synced_at?: string | null
           name?: string
           notes?: string | null
           region?: string | null
+          source_url?: string | null
           type?: Database["public"]["Enums"]["operator_type"]
           updated_at?: string
         }
