@@ -165,11 +165,17 @@ export default function Incidents() {
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span>📅 {format(new Date(i.detected_at), "dd/MM/yyyy HH:mm")}</span>
                   {i.operators?.name && <span>🏢 {i.operators.name}</span>}
+                  {i.closed_at && <span>🔒 Clôturé le {format(new Date(i.closed_at), "dd/MM/yyyy HH:mm")}</span>}
                 </div>
-                {(isAdmin || isAnalyst) && (
+                {i.closure_comment && (
+                  <div className="mt-2 p-2 rounded bg-muted/50 border-l-2 border-primary text-xs">
+                    <span className="font-semibold">Commentaire de clôture: </span>{i.closure_comment}
+                  </div>
+                )}
+                {(isAdmin || isAnalyst) && i.status !== "closed" && (
                   <div className="flex flex-wrap gap-1 mt-3">
                     {Object.entries(incidentStatusLabel).filter(([k]) => k !== i.status).map(([k, v]) => (
-                      <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus)}>→ {v}</Button>
+                      <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus, i)}>→ {v}</Button>
                     ))}
                   </div>
                 )}
@@ -179,6 +185,28 @@ export default function Incidents() {
         ))}
         {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground">Aucun incident</div>}
       </div>
+
+      <Dialog open={!!closeDialog} onOpenChange={v => !v && setCloseDialog(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Clôturer l'incident</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">{closeDialog?.title}</p>
+            <div>
+              <Label>Commentaire de clôture <span className="text-destructive">*</span></Label>
+              <Textarea
+                value={closureComment}
+                onChange={e => setClosureComment(e.target.value)}
+                placeholder="Résumé de la résolution, leçons apprises, actions de prévention..."
+                rows={5}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setCloseDialog(null)} className="flex-1">Annuler</Button>
+              <Button onClick={confirmClose} className="flex-1">Confirmer la clôture</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
