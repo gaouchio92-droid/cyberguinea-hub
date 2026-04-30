@@ -106,7 +106,7 @@ export default function Users() {
                     {isOp && <Badge className="bg-secondary/15 text-secondary border-secondary/30">Opérateur</Badge>}
                     {!isA && !isAn && !isOp && <Badge variant="outline" className="text-muted-foreground">Aucun rôle</Badge>}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <Button size="sm" variant={isA ? "destructive" : "default"} onClick={() => toggleRole(r.id, "admin", isA)}>
                       {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Admin</>}
                     </Button>
@@ -116,6 +116,16 @@ export default function Users() {
                     <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "operator", isOp)}>
                       {isOp ? "Retirer opérateur" : "Opérateur"}
                     </Button>
+                    <Select
+                      value={r.operator_id ?? "none"}
+                      onValueChange={(v) => setOperator(r.id, v === "none" ? null : v)}
+                    >
+                      <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Opérateur associé" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— Aucun opérateur —</SelectItem>
+                        {operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               );
