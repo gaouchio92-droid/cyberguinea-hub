@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
@@ -9,9 +10,12 @@ import { incidentTypeLabel, severityColor, severityLabel } from "@/lib/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-function KpiCard({ icon: Icon, label, value, sub, accent }: any) {
+function KpiCard({ icon: Icon, label, value, sub, accent, onClick }: any) {
   return (
-    <Card className="p-5 gradient-card border-border hover:border-primary/40 transition-smooth shadow-card">
+    <Card
+      onClick={onClick}
+      className={`p-5 gradient-card border-border hover:border-primary/40 transition-smooth shadow-card ${onClick ? "cursor-pointer" : ""}`}
+    >
       <div className="flex items-start justify-between">
         <div>
           <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{label}</div>
@@ -29,6 +33,7 @@ function KpiCard({ icon: Icon, label, value, sub, accent }: any) {
 const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--muted-foreground))"];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [kpi, setKpi] = useState<any>(null);
   const [trend, setTrend] = useState<any[]>([]);
   const [byType, setByType] = useState<any[]>([]);
@@ -70,11 +75,11 @@ export default function Dashboard() {
       <PageHeader title="Tableau de bord exécutif" description="Vue d'ensemble cybersécurité — ARPT Guinée / CERT National" />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <KpiCard icon={ShieldAlert} label="Incidents ouverts" value={kpi?.incidents_open ?? open} sub="Cumul actuel" accent="bg-destructive/10 text-destructive" />
-        <KpiCard icon={Clock} label="MTTD" value={`${kpi?.mttd_minutes ?? 0} min`} sub="Délai de détection" accent="bg-secondary/10 text-secondary" />
-        <KpiCard icon={Activity} label="MTTR" value={`${Math.round((kpi?.mttr_minutes ?? 0) / 60)}h`} sub="Délai de remédiation" accent="bg-primary/10 text-primary" />
-        <KpiCard icon={Building2} label="Conformité opérateurs" value={`${kpi?.operator_compliance_avg ?? 0}%`} sub={`${opCount} entités`} accent="bg-primary/10 text-primary" />
-        <KpiCard icon={AlertTriangle} label="Niveau de menace" value={(kpi?.threat_level ?? "medium").toUpperCase()} sub="Évaluation CERT" accent="bg-warning/10 text-warning" />
+        <KpiCard icon={ShieldAlert} label="Incidents ouverts" value={kpi?.incidents_open ?? open} sub="Cumul actuel" accent="bg-destructive/10 text-destructive" onClick={() => navigate("/incidents")} />
+        <KpiCard icon={Clock} label="MTTD" value={`${kpi?.mttd_minutes ?? 0} min`} sub="Délai de détection" accent="bg-secondary/10 text-secondary" onClick={() => navigate("/reports")} />
+        <KpiCard icon={Activity} label="MTTR" value={`${Math.round((kpi?.mttr_minutes ?? 0) / 60)}h`} sub="Délai de remédiation" accent="bg-primary/10 text-primary" onClick={() => navigate("/reports")} />
+        <KpiCard icon={Building2} label="Conformité opérateurs" value={`${kpi?.operator_compliance_avg ?? 0}%`} sub={`${opCount} entités`} accent="bg-primary/10 text-primary" onClick={() => navigate("/operators")} />
+        <KpiCard icon={AlertTriangle} label="Niveau de menace" value={(kpi?.threat_level ?? "medium").toUpperCase()} sub="Évaluation CERT" accent="bg-warning/10 text-warning" onClick={() => navigate("/intel")} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -127,7 +132,7 @@ export default function Dashboard() {
           <h3 className="font-semibold mb-4 flex items-center gap-2"><Radar className="h-4 w-4 text-secondary" /> Threat Intelligence récent</h3>
           <div className="space-y-3">
             {intel.map(i => (
-              <div key={i.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-smooth">
+              <div key={i.id} onClick={() => navigate("/intel")} className="cursor-pointer flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-smooth">
                 <Badge className={severityColor[i.severity as keyof typeof severityColor]}>{severityLabel[i.severity as keyof typeof severityLabel]}</Badge>
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm truncate">{i.title}</div>
@@ -143,7 +148,7 @@ export default function Dashboard() {
         <h3 className="font-semibold mb-4">Incidents récents</h3>
         <div className="space-y-2">
           {recent.map(i => (
-            <div key={i.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-smooth">
+            <div key={i.id} onClick={() => navigate(`/incidents/${i.id}`)} className="cursor-pointer flex items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-smooth">
               <Badge className={severityColor[i.severity as keyof typeof severityColor]}>{severityLabel[i.severity as keyof typeof severityLabel]}</Badge>
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-sm truncate">{i.title}</div>
