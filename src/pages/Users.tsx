@@ -82,58 +82,72 @@ export default function Users() {
         description="Administration des comptes et rôles — réservé aux administrateurs"
         action={<NewUserDialog onCreated={load} />}
       />
-      <Card className="p-5 gradient-card">
-        {loading ? (
+      {loading ? (
+        <Card className="p-5 gradient-card">
           <div className="flex items-center justify-center py-10"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
-        ) : (
-          <div className="space-y-2">
-            {rows.map(r => {
-              const isA = r.roles.includes("admin");
-              const isAn = r.roles.includes("analyst");
-              const isOp = r.roles.includes("operator");
-              return (
-                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-smooth">
-                  <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shrink-0">
-                    <UserCheck className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm truncate">{r.full_name ?? "Sans nom"}</div>
-                    <div className="text-[11px] text-muted-foreground">Créé le {format(new Date(r.created_at), "dd MMM yyyy", { locale: fr })}</div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {isA && <Badge className="bg-primary/15 text-primary border-primary/30">Administrateur</Badge>}
-                    {isAn && <Badge variant="outline">Analyste</Badge>}
-                    {isOp && <Badge className="bg-secondary/15 text-secondary border-secondary/30">Opérateur</Badge>}
-                    {!isA && !isAn && !isOp && <Badge variant="outline" className="text-muted-foreground">Aucun rôle</Badge>}
-                  </div>
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <Button size="sm" variant={isA ? "destructive" : "default"} onClick={() => toggleRole(r.id, "admin", isA)}>
-                      {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Admin</>}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "analyst", isAn)}>
-                      {isAn ? "Retirer analyste" : "Analyste"}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "operator", isOp)}>
-                      {isOp ? "Retirer opérateur" : "Opérateur"}
-                    </Button>
-                    <Select
-                      value={r.operator_id ?? "none"}
-                      onValueChange={(v) => setOperator(r.id, v === "none" ? null : v)}
-                    >
-                      <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Opérateur associé" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">— Aucun opérateur —</SelectItem>
-                        {operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
+        </Card>
+      ) : (() => {
+        const groups: { key: string; label: string; badgeClass: string; rows: Row[] }[] = [
+          { key: "admin", label: "Administrateurs", badgeClass: "bg-primary/15 text-primary border-primary/30", rows: rows.filter(r => r.roles.includes("admin")) },
+          { key: "analyst", label: "Analystes", badgeClass: "bg-accent/15 text-accent-foreground border-accent/30", rows: rows.filter(r => r.roles.includes("analyst") && !r.roles.includes("admin")) },
+          { key: "operator", label: "Opérateurs", badgeClass: "bg-secondary/15 text-secondary border-secondary/30", rows: rows.filter(r => r.roles.includes("operator") && !r.roles.includes("admin") && !r.roles.includes("analyst")) },
+          { key: "guest", label: "Invités", badgeClass: "text-muted-foreground", rows: rows.filter(r => r.roles.length === 0) },
+        ];
+        return (
+          <div className="space-y-6">
+            {groups.map(g => (
+              <Card key={g.key} className="p-5 gradient-card">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-semibold flex items-center gap-2">
+                    <Badge className={g.badgeClass}>{g.label}</Badge>
+                    <span className="text-muted-foreground font-normal">({g.rows.length})</span>
+                  </h3>
                 </div>
-              );
-            })}
-            {!rows.length && <p className="text-sm text-muted-foreground text-center py-6">Aucun utilisateur</p>}
+                <div className="space-y-2">
+                  {g.rows.map(r => {
+                    const isA = r.roles.includes("admin");
+                    const isAn = r.roles.includes("analyst");
+                    const isOp = r.roles.includes("operator");
+                    return (
+                      <div key={r.id} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-smooth">
+                        <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center shrink-0">
+                          <UserCheck className="h-4 w-4 text-primary-foreground" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{r.full_name ?? "Sans nom"}</div>
+                          <div className="text-[11px] text-muted-foreground">Créé le {format(new Date(r.created_at), "dd MMM yyyy", { locale: fr })}</div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <Button size="sm" variant={isA ? "destructive" : "default"} onClick={() => toggleRole(r.id, "admin", isA)}>
+                            {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Admin</>}
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "analyst", isAn)}>
+                            {isAn ? "Retirer analyste" : "Analyste"}
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "operator", isOp)}>
+                            {isOp ? "Retirer opérateur" : "Opérateur"}
+                          </Button>
+                          <Select
+                            value={r.operator_id ?? "none"}
+                            onValueChange={(v) => setOperator(r.id, v === "none" ? null : v)}
+                          >
+                            <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Opérateur associé" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">— Aucun opérateur —</SelectItem>
+                              {operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {!g.rows.length && <p className="text-xs text-muted-foreground text-center py-4">Aucun utilisateur dans ce groupe</p>}
+                </div>
+              </Card>
+            ))}
           </div>
-        )}
-      </Card>
+        );
+      })()}
     </div>
   );
 }
