@@ -8,6 +8,7 @@ import AppLayout from "@/components/AppLayout";
 import Dashboard from "./pages/Dashboard";
 import Tasks from "./pages/Tasks";
 import Incidents from "./pages/Incidents";
+import IncidentDetail from "./pages/IncidentDetail";
 import Intel from "./pages/Intel";
 import Operators from "./pages/Operators";
 import Reports from "./pages/Reports";
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/" element={<Dashboard />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/incidents" element={<Incidents />} />
+              <Route path="/incidents/:id" element={<IncidentDetail />} />
               <Route path="/intel" element={<Intel />} />
               <Route path="/operators" element={<Operators />} />
               <Route path="/reports" element={<Reports />} />
