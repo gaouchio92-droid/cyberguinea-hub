@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Download, FileText } from "lucide-react";
 import { incidentStatusLabel, incidentTypeLabel, severityColor, severityLabel, IncidentStatus, IncidentType, Severity } from "@/lib/types";
@@ -17,6 +18,7 @@ import { format } from "date-fns";
 
 export default function Incidents() {
   const { user, isAdmin, isAnalyst } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<any[]>([]);
   const [operators, setOperators] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -149,7 +151,7 @@ export default function Incidents() {
 
       <div className="grid gap-3">
         {filtered.map(i => (
-          <Card key={i.id} className="p-4 gradient-card hover:border-primary/40 transition-smooth">
+          <Card key={i.id} className="p-4 gradient-card hover:border-primary/40 transition-smooth cursor-pointer" onClick={() => navigate(`/incidents/${i.id}`)}>
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                 <FileText className="h-5 w-5 text-primary" />
@@ -173,7 +175,7 @@ export default function Incidents() {
                   </div>
                 )}
                 {(isAdmin || isAnalyst) && i.status !== "closed" && (
-                  <div className="flex flex-wrap gap-1 mt-3">
+                  <div className="flex flex-wrap gap-1 mt-3" onClick={e => e.stopPropagation()}>
                     {Object.entries(incidentStatusLabel).filter(([k]) => k !== i.status).map(([k, v]) => (
                       <Button key={k} size="sm" variant="ghost" className="h-7 text-xs" onClick={() => updateStatus(i.id, k as IncidentStatus, i)}>→ {v}</Button>
                     ))}
