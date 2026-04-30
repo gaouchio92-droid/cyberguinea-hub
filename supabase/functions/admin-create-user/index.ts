@@ -49,11 +49,11 @@ Deno.serve(async (req) => {
 
     const newId = created.user.id;
 
-    // 4. Trigger handle_new_user already inserted profile + analyst role.
-    // Update profile name. If a different role is requested, replace analyst with it.
+    // 4. Trigger handle_new_user already inserted profile + operator role.
+    // Update profile name. If a different role is requested, replace operator with it.
     await admin.from("profiles").update({ full_name: fullName }).eq("id", newId);
-    if (role !== "analyst") {
-      await admin.from("user_roles").delete().eq("user_id", newId).eq("role", "analyst");
+    if (role !== "operator") {
+      await admin.from("user_roles").delete().eq("user_id", newId).eq("role", "operator");
       await admin.from("user_roles").insert({ user_id: newId, role });
     }
 

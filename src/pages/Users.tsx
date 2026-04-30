@@ -23,25 +23,36 @@ const newUserSchema = z.object({
   role: z.enum(["admin", "analyst", "operator"]),
 });
 
-type Row = { id: string; full_name: string | null; created_at: string; roles: string[] };
+type Row = { id: string; full_name: string | null; created_at: string; roles: string[]; operator_id: string | null };
+type Operator = { id: string; name: string };
 
 export default function Users() {
   const { isAdmin, loading: authLoading, user } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
+  const [operators, setOperators] = useState<Operator[]>([]);
   const [loading, setLoading] = useState(true);
 
   async function load() {
     setLoading(true);
-    const [{ data: profiles }, { data: rolesData }] = await Promise.all([
-      supabase.from("profiles").select("id, full_name, created_at").order("created_at", { ascending: false }),
+    const [{ data: profiles }, { data: rolesData }, { data: ops }] = await Promise.all([
+      supabase.from("profiles").select("id, full_name, created_at, operator_id").order("created_at", { ascending: false }),
       supabase.from("user_roles").select("user_id, role"),
+      supabase.from("operators").select("id, name").order("name"),
     ]);
     const byUser: Record<string, string[]> = {};
     (rolesData ?? []).forEach((r: any) => {
       byUser[r.user_id] = [...(byUser[r.user_id] ?? []), r.role];
     });
     setRows((profiles ?? []).map((p: any) => ({ ...p, roles: byUser[p.id] ?? [] })));
+    setOperators(ops ?? []);
     setLoading(false);
+  }
+
+  async function setOperator(userId: string, operatorId: string | null) {
+    const { error } = await supabase.from("profiles").update({ operator_id: operatorId }).eq("id", userId);
+    if (error) return toast.error(error.message);
+    toast.success("Opérateur associé");
+    load();
   }
 
   useEffect(() => { if (isAdmin) load(); }, [isAdmin]);
@@ -95,7 +106,7 @@ export default function Users() {
                     {isOp && <Badge className="bg-secondary/15 text-secondary border-secondary/30">Opérateur</Badge>}
                     {!isA && !isAn && !isOp && <Badge variant="outline" className="text-muted-foreground">Aucun rôle</Badge>}
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
                     <Button size="sm" variant={isA ? "destructive" : "default"} onClick={() => toggleRole(r.id, "admin", isA)}>
                       {isA ? <><ShieldOff className="h-4 w-4" /> Retirer admin</> : <><Shield className="h-4 w-4" /> Admin</>}
                     </Button>
@@ -105,6 +116,16 @@ export default function Users() {
                     <Button size="sm" variant="outline" onClick={() => toggleRole(r.id, "operator", isOp)}>
                       {isOp ? "Retirer opérateur" : "Opérateur"}
                     </Button>
+                    <Select
+                      value={r.operator_id ?? "none"}
+                      onValueChange={(v) => setOperator(r.id, v === "none" ? null : v)}
+                    >
+                      <SelectTrigger className="h-9 w-[180px]"><SelectValue placeholder="Opérateur associé" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">— Aucun opérateur —</SelectItem>
+                        {operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               );
