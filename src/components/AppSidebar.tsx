@@ -39,6 +39,7 @@ export function AppSidebar() {
   const [mapOpen, setMapOpen] = useState(false);
 
   return (
+    <>
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
