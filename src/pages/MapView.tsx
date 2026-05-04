@@ -79,6 +79,14 @@ export default function MapView() {
   const [editingFiber, setEditingFiber] = useState<any | null>(null);
   const [editFiberForm, setEditFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "", status: "active" });
 
+  // --- Ajout opérateur / FAI ---
+  const [opOpen, setOpOpen] = useState(false);
+  const [opPickMode, setOpPickMode] = useState(false);
+  const [opForm, setOpForm] = useState({
+    name: "", type: "telecom" as "telecom" | "isp", region: "",
+    contact_email: "", contact_phone: "", latitude: "", longitude: "",
+  });
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
@@ -99,6 +107,9 @@ export default function MapView() {
   const placedOperators = useMemo(() => {
     const counters: Record<string, number> = {};
     return operators.map(op => {
+      if (op.latitude != null && op.longitude != null) {
+        return { ...op, _coord: [op.latitude, op.longitude] as [number, number] };
+      }
       const region = op.region || "Conakry";
       const base = REGION_COORDS[region] || GUINEA_CENTER;
       const idx = counters[region] = (counters[region] ?? -1) + 1;
@@ -207,6 +218,43 @@ export default function MapView() {
     refresh();
   }
 
+  function startAddOperator() {
+    setOpForm({ name: "", type: "telecom", region: "", contact_email: "", contact_phone: "", latitude: "", longitude: "" });
+    setOpOpen(true);
+  }
+
+  function useMyLocationOperator() {
+    if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
+        toast.success("Position GPS récupérée");
+      },
+      () => toast.error("Impossible de récupérer la position"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  async function submitOperator() {
+    if (!user) return toast.error("Vous devez être connecté");
+    if (!opForm.name.trim()) return toast.error("Nom requis");
+    const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
+    if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    const { error } = await supabase.from("operators").insert([{
+      name: opForm.name,
+      type: opForm.type,
+      region: opForm.region || null,
+      contact_email: opForm.contact_email || null,
+      contact_phone: opForm.contact_phone || null,
+      latitude: lat,
+      longitude: lng,
+    }]);
+    if (error) return toast.error(error.message);
+    toast.success("Opérateur ajouté");
+    setOpOpen(false);
+    refresh();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -224,6 +272,9 @@ export default function MapView() {
           </Button>
           <Button size="sm" onClick={startReport}>
             <MapPin className="h-4 w-4 mr-1" />Signaler ici
+          </Button>
+          <Button size="sm" variant="outline" onClick={startAddOperator}>
+            <Building2 className="h-4 w-4 mr-1" />Ajouter opérateur / FAI
           </Button>
           <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
             {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
@@ -265,6 +316,15 @@ export default function MapView() {
 
           {drawMode && (
             <ClickToPlace onPick={(c) => setDrawPoints(p => [...p, c])} />
+          )}
+
+          {opPickMode && (
+            <ClickToPlace onPick={(c) => {
+              setOpForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setOpPickMode(false);
+              setOpOpen(true);
+              toast.success("Position sélectionnée");
+            }} />
           )}
 
           {drawMode && drawPoints.length > 0 && (
@@ -518,6 +578,66 @@ export default function MapView() {
               <Button variant="outline" onClick={() => setEditingFiber(null)}>Annuler</Button>
               <Button onClick={saveEditFiber}>Enregistrer</Button>
             </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={opOpen} onOpenChange={setOpOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Ajouter un opérateur / FAI</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={opForm.name} onChange={e => setOpForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Orange Guinée" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Type</Label>
+                <Select value={opForm.type} onValueChange={(v: any) => setOpForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="telecom">Opérateur télécom</SelectItem>
+                    <SelectItem value="isp">FAI</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Région</Label>
+                <Input value={opForm.region} onChange={e => setOpForm(f => ({ ...f, region: e.target.value }))} placeholder="Conakry" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Email</Label>
+                <Input value={opForm.contact_email} onChange={e => setOpForm(f => ({ ...f, contact_email: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Téléphone</Label>
+                <Input value={opForm.contact_phone} onChange={e => setOpForm(f => ({ ...f, contact_phone: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Latitude</Label>
+                <Input value={opForm.latitude} onChange={e => setOpForm(f => ({ ...f, latitude: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Longitude</Label>
+                <Input value={opForm.longitude} onChange={e => setOpForm(f => ({ ...f, longitude: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1" onClick={useMyLocationOperator}>
+                <Crosshair className="h-4 w-4 mr-1" />Ma position GPS
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => { setOpOpen(false); setOpPickMode(true); toast.info("Cliquez sur la carte pour positionner l'opérateur"); }}>
+                <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpOpen(false)}>Annuler</Button>
+            <Button onClick={submitOperator}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
