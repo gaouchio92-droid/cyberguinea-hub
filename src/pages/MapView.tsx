@@ -223,6 +223,20 @@ export default function MapView() {
             }} />
           )}
 
+          {drawMode && (
+            <ClickToPlace onPick={(c) => setDrawPoints(p => [...p, c])} />
+          )}
+
+          {drawMode && drawPoints.length > 0 && (
+            <>
+              <Polyline positions={drawPoints} pathOptions={{ color: fiberForm.color || "#3b82f6", weight: 4, dashArray: "8 6", opacity: 0.9 }} />
+              {drawPoints.map((p, i) => (
+                <CircleMarker key={i} center={p} radius={5}
+                  pathOptions={{ color: "#fff", fillColor: fiberForm.color || "#3b82f6", fillOpacity: 1, weight: 2 }} />
+              ))}
+            </>
+          )}
+
           {(layer==="all"||layer==="fiber") && fiberLinks.map(fl => {
             const coords = Array.isArray(fl.coordinates) ? fl.coordinates as [number,number][] : [];
             if (coords.length < 2) return null;
