@@ -100,5 +100,16 @@ export function AppSidebar() {
         </Button>
       </SidebarFooter>
     </Sidebar>
+    <Dialog open={mapOpen} onOpenChange={setMapOpen}>
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-4 overflow-auto">
+        <DialogHeader>
+          <DialogTitle>Cartographie</DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 min-h-0">
+          <MapView />
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
