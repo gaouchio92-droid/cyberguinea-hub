@@ -69,6 +69,12 @@ export default function MapView() {
     title: "", description: "", latitude: "", longitude: "",
   });
 
+  // --- Mode tracer un lien fibre ---
+  const [drawMode, setDrawMode] = useState(false);
+  const [drawPoints, setDrawPoints] = useState<[number, number][]>([]);
+  const [fiberDialogOpen, setFiberDialogOpen] = useState(false);
+  const [fiberForm, setFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "" });
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
@@ -127,6 +133,40 @@ export default function MapView() {
     setReportOpen(false); refresh();
   }
 
+  function startDrawFiber() {
+    if (drawMode) {
+      // confirm finalize
+      if (drawPoints.length < 2) { toast.error("Au moins 2 points requis"); return; }
+      setDrawMode(false);
+      setFiberForm({ name: "", description: "", color: "#3b82f6", operator_id: "" });
+      setFiberDialogOpen(true);
+    } else {
+      setDrawPoints([]);
+      setDrawMode(true);
+      setPickMode(false);
+      toast.info("Cliquez sur la carte pour ajouter des points. Cliquez à nouveau sur ‘Terminer le tracé’ pour enregistrer.");
+    }
+  }
+
+  async function submitFiberLink() {
+    if (!user) return toast.error("Vous devez être connecté");
+    if (!fiberForm.name.trim()) return toast.error("Nom requis");
+    if (drawPoints.length < 2) return toast.error("Tracé invalide");
+    const { error } = await supabase.from("fiber_links").insert([{
+      name: fiberForm.name,
+      description: fiberForm.description || null,
+      color: fiberForm.color || "#3b82f6",
+      operator_id: fiberForm.operator_id || null,
+      coordinates: drawPoints as any,
+      created_by: user.id,
+    }]);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre enregistré");
+    setFiberDialogOpen(false);
+    setDrawPoints([]);
+    refresh();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -138,13 +178,26 @@ export default function MapView() {
         {([["all","Tout"],["operators","Opérateurs"],["incidents","Incidents"],["fiber","Liens fibre"],["markers","Signalements"]] as const).map(([k,v])=>(
           <Button key={k} size="sm" variant={layer===k?"default":"outline"} onClick={()=>setLayer(k)}>{v}</Button>
         ))}
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex gap-2 flex-wrap">
           <Button size="sm" variant={pickMode?"default":"outline"} onClick={()=>setPickMode(p=>!p)}>
             <Crosshair className="h-4 w-4 mr-1" />{pickMode?"Cliquez sur la carte…":"Choisir sur carte"}
           </Button>
           <Button size="sm" onClick={startReport}>
             <MapPin className="h-4 w-4 mr-1" />Signaler ici
           </Button>
+          <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
+            {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
+          </Button>
+          {drawMode && drawPoints.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => setDrawPoints(p => p.slice(0, -1))}>
+              Annuler dernier point
+            </Button>
+          )}
+          {drawMode && (
+            <Button size="sm" variant="ghost" onClick={() => { setDrawMode(false); setDrawPoints([]); }}>
+              Abandonner
+            </Button>
+          )}
         </div>
       </div>
 
@@ -168,6 +221,20 @@ export default function MapView() {
               setReportOpen(true);
               toast.success("Position sélectionnée");
             }} />
+          )}
+
+          {drawMode && (
+            <ClickToPlace onPick={(c) => setDrawPoints(p => [...p, c])} />
+          )}
+
+          {drawMode && drawPoints.length > 0 && (
+            <>
+              <Polyline positions={drawPoints} pathOptions={{ color: fiberForm.color || "#3b82f6", weight: 4, dashArray: "8 6", opacity: 0.9 }} />
+              {drawPoints.map((p, i) => (
+                <CircleMarker key={i} center={p} radius={5}
+                  pathOptions={{ color: "#fff", fillColor: fiberForm.color || "#3b82f6", fillOpacity: 1, weight: 2 }} />
+              ))}
+            </>
           )}
 
           {(layer==="all"||layer==="fiber") && fiberLinks.map(fl => {
@@ -295,6 +362,42 @@ export default function MapView() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportOpen(false)}>Annuler</Button>
             <Button onClick={submitReport}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={fiberDialogOpen} onOpenChange={(o) => { setFiberDialogOpen(o); if (!o) setDrawPoints([]); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nouveau lien fibre ({drawPoints.length} points)</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={fiberForm.name} onChange={e => setFiberForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Backbone Conakry – Kindia" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={fiberForm.description} onChange={e => setFiberForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Couleur</Label>
+                <Input type="color" value={fiberForm.color} onChange={e => setFiberForm(f => ({ ...f, color: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Opérateur</Label>
+                <Select value={fiberForm.operator_id || "none"} onValueChange={(v) => setFiberForm(f => ({ ...f, operator_id: v === "none" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Aucun</SelectItem>
+                    {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setFiberDialogOpen(false); setDrawPoints([]); }}>Annuler</Button>
+            <Button onClick={submitFiberLink}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
