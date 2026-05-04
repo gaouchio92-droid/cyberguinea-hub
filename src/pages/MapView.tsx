@@ -99,6 +99,9 @@ export default function MapView() {
   const placedOperators = useMemo(() => {
     const counters: Record<string, number> = {};
     return operators.map(op => {
+      if (op.latitude != null && op.longitude != null) {
+        return { ...op, _coord: [op.latitude, op.longitude] as [number, number] };
+      }
       const region = op.region || "Conakry";
       const base = REGION_COORDS[region] || GUINEA_CENTER;
       const idx = counters[region] = (counters[region] ?? -1) + 1;
