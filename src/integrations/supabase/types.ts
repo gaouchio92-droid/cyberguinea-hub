@@ -58,6 +58,45 @@ export type Database = {
           },
         ]
       }
+      fiber_links: {
+        Row: {
+          color: string | null
+          coordinates: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          operator_id: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          coordinates: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          operator_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          coordinates?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          operator_id?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       incidents: {
         Row: {
           closed_at: string | null
@@ -204,6 +243,48 @@ export type Database = {
           operator_compliance_avg?: number | null
           snapshot_date?: string
           threat_level?: string | null
+        }
+        Relationships: []
+      }
+      map_markers: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          latitude: number
+          longitude: number
+          operator_id: string | null
+          status: string | null
+          title: string
+          type: Database["public"]["Enums"]["map_marker_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude: number
+          longitude: number
+          operator_id?: string | null
+          status?: string | null
+          title: string
+          type: Database["public"]["Enums"]["map_marker_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          latitude?: number
+          longitude?: number
+          operator_id?: string | null
+          status?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["map_marker_type"]
+          updated_at?: string
         }
         Relationships: []
       }
@@ -494,6 +575,7 @@ export type Database = {
         | "phishing_campaign"
         | "other"
       log_level: "info" | "warning" | "error" | "critical" | "debug"
+      map_marker_type: "incident" | "signalement" | "travaux" | "maintenance"
       operation_status:
         | "planned"
         | "ongoing"
@@ -664,6 +746,7 @@ export const Constants = {
         "other",
       ],
       log_level: ["info", "warning", "error", "critical", "debug"],
+      map_marker_type: ["incident", "signalement", "travaux", "maintenance"],
       operation_status: [
         "planned",
         "ongoing",
