@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker, Polyline, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -74,6 +74,10 @@ export default function MapView() {
   const [drawPoints, setDrawPoints] = useState<[number, number][]>([]);
   const [fiberDialogOpen, setFiberDialogOpen] = useState(false);
   const [fiberForm, setFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "" });
+
+  // --- Edition d'un lien fibre existant ---
+  const [editingFiber, setEditingFiber] = useState<any | null>(null);
+  const [editFiberForm, setEditFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "", status: "active" });
 
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
@@ -167,6 +171,42 @@ export default function MapView() {
     refresh();
   }
 
+  function openEditFiber(fl: any) {
+    setEditingFiber(fl);
+    setEditFiberForm({
+      name: fl.name ?? "",
+      description: fl.description ?? "",
+      color: fl.color ?? "#3b82f6",
+      operator_id: fl.operator_id ?? "",
+      status: fl.status ?? "active",
+    });
+  }
+
+  async function saveEditFiber() {
+    if (!editingFiber) return;
+    if (!editFiberForm.name.trim()) return toast.error("Nom requis");
+    const { error } = await supabase.from("fiber_links").update({
+      name: editFiberForm.name,
+      description: editFiberForm.description || null,
+      color: editFiberForm.color,
+      operator_id: editFiberForm.operator_id || null,
+      status: editFiberForm.status,
+    }).eq("id", editingFiber.id);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre mis à jour");
+    setEditingFiber(null);
+    refresh();
+  }
+
+  async function deleteFiber(id: string) {
+    if (!confirm("Supprimer ce lien fibre ?")) return;
+    const { error } = await supabase.from("fiber_links").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre supprimé");
+    setEditingFiber(null);
+    refresh();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -241,15 +281,44 @@ export default function MapView() {
             const coords = Array.isArray(fl.coordinates) ? fl.coordinates as [number,number][] : [];
             if (coords.length < 2) return null;
             return (
-              <Polyline key={fl.id} positions={coords} pathOptions={{ color: fl.color || "#3b82f6", weight: 4, opacity: 0.8 }}>
-                <Popup>
-                  <div className="space-y-1 min-w-[180px]">
-                    <div className="font-semibold">{fl.name}</div>
-                    {fl.description && <div className="text-xs">{fl.description}</div>}
-                    <Badge variant="outline">{fl.status}</Badge>
-                  </div>
-                </Popup>
-              </Polyline>
+              <React.Fragment key={fl.id}>
+                <Polyline positions={coords} pathOptions={{ color: fl.color || "#3b82f6", weight: 5, opacity: 0.85 }}>
+                  <Popup>
+                    <div className="space-y-2 min-w-[200px]">
+                      <div className="font-semibold flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-sm" style={{ background: fl.color || "#3b82f6" }} />
+                        {fl.name}
+                      </div>
+                      {fl.description && <div className="text-xs">{fl.description}</div>}
+                      <div className="text-xs flex gap-2">
+                        <Badge variant="outline">{fl.status}</Badge>
+                        <Badge variant="secondary">{coords.length} pts</Badge>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditFiber(fl)}>Modifier</Button>
+                        <Button size="sm" variant="destructive" className="flex-1" onClick={() => deleteFiber(fl.id)}>Supprimer</Button>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polyline>
+                {coords.map((p, i) => (
+                  <CircleMarker key={`${fl.id}-${i}`} center={p} radius={4}
+                    pathOptions={{ color: "#fff", fillColor: fl.color || "#3b82f6", fillOpacity: 1, weight: 2 }}
+                    eventHandlers={{ click: () => openEditFiber(fl) }}>
+                    <Popup>
+                      <div className="space-y-2 min-w-[180px]">
+                        <div className="font-semibold text-sm">{fl.name}</div>
+                        <div className="text-xs text-muted-foreground">Point {i + 1} / {coords.length}</div>
+                        <div className="text-[10px] text-muted-foreground">{p[0].toFixed(4)}, {p[1].toFixed(4)}</div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditFiber(fl)}>Modifier</Button>
+                          <Button size="sm" variant="destructive" className="flex-1" onClick={() => deleteFiber(fl.id)}>Supprimer</Button>
+                        </div>
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                ))}
+              </React.Fragment>
             );
           })}
 
@@ -398,6 +467,57 @@ export default function MapView() {
           <DialogFooter>
             <Button variant="outline" onClick={() => { setFiberDialogOpen(false); setDrawPoints([]); }}>Annuler</Button>
             <Button onClick={submitFiberLink}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editingFiber} onOpenChange={(o) => { if (!o) setEditingFiber(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Modifier le lien fibre</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={editFiberForm.name} onChange={e => setEditFiberForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={editFiberForm.description} onChange={e => setEditFiberForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label>Couleur</Label>
+                <Input type="color" value={editFiberForm.color} onChange={e => setEditFiberForm(f => ({ ...f, color: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Statut</Label>
+                <Select value={editFiberForm.status} onValueChange={(v) => setEditFiberForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Actif</SelectItem>
+                    <SelectItem value="degraded">Dégradé</SelectItem>
+                    <SelectItem value="down">Coupé</SelectItem>
+                    <SelectItem value="planned">Planifié</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Opérateur</Label>
+                <Select value={editFiberForm.operator_id || "none"} onValueChange={(v) => setEditFiberForm(f => ({ ...f, operator_id: v === "none" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Aucun</SelectItem>
+                    {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex-row justify-between sm:justify-between">
+            <Button variant="destructive" onClick={() => editingFiber && deleteFiber(editingFiber.id)}>Supprimer</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setEditingFiber(null)}>Annuler</Button>
+              <Button onClick={saveEditFiber}>Enregistrer</Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
