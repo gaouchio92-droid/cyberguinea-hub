@@ -133,6 +133,40 @@ export default function MapView() {
     setReportOpen(false); refresh();
   }
 
+  function startDrawFiber() {
+    if (drawMode) {
+      // confirm finalize
+      if (drawPoints.length < 2) { toast.error("Au moins 2 points requis"); return; }
+      setDrawMode(false);
+      setFiberForm({ name: "", description: "", color: "#3b82f6", operator_id: "" });
+      setFiberDialogOpen(true);
+    } else {
+      setDrawPoints([]);
+      setDrawMode(true);
+      setPickMode(false);
+      toast.info("Cliquez sur la carte pour ajouter des points. Cliquez à nouveau sur ‘Terminer le tracé’ pour enregistrer.");
+    }
+  }
+
+  async function submitFiberLink() {
+    if (!user) return toast.error("Vous devez être connecté");
+    if (!fiberForm.name.trim()) return toast.error("Nom requis");
+    if (drawPoints.length < 2) return toast.error("Tracé invalide");
+    const { error } = await supabase.from("fiber_links").insert([{
+      name: fiberForm.name,
+      description: fiberForm.description || null,
+      color: fiberForm.color || "#3b82f6",
+      operator_id: fiberForm.operator_id || null,
+      coordinates: drawPoints as any,
+      created_by: user.id,
+    }]);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre enregistré");
+    setFiberDialogOpen(false);
+    setDrawPoints([]);
+    refresh();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
