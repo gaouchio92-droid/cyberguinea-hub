@@ -117,10 +117,10 @@ export default function MapView() {
     if (!user) return toast.error("Vous devez être connecté");
     const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
     if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
-    const { error } = await supabase.from("map_markers").insert({
+    const { error } = await supabase.from("map_markers").insert([{
       type: form.type, title: form.title, description: form.description || null,
       latitude: lat, longitude: lng, created_by: user.id,
-    });
+    }]);
     if (error) return toast.error(error.message);
     toast.success("Signalement enregistré");
     setReportOpen(false); refresh();
