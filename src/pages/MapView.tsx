@@ -281,7 +281,7 @@ export default function MapView() {
             const coords = Array.isArray(fl.coordinates) ? fl.coordinates as [number,number][] : [];
             if (coords.length < 2) return null;
             return (
-              <div key={fl.id}>
+              <React.Fragment key={fl.id}>
                 <Polyline positions={coords} pathOptions={{ color: fl.color || "#3b82f6", weight: 5, opacity: 0.85 }}>
                   <Popup>
                     <div className="space-y-2 min-w-[200px]">
