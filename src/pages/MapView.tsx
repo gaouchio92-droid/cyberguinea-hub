@@ -218,7 +218,43 @@ export default function MapView() {
     refresh();
   }
 
-  return (
+  function startAddOperator() {
+    setOpForm({ name: "", type: "telecom", region: "", contact_email: "", contact_phone: "", latitude: "", longitude: "" });
+    setOpOpen(true);
+  }
+
+  function useMyLocationOperator() {
+    if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
+        toast.success("Position GPS récupérée");
+      },
+      () => toast.error("Impossible de récupérer la position"),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
+  async function submitOperator() {
+    if (!user) return toast.error("Vous devez être connecté");
+    if (!opForm.name.trim()) return toast.error("Nom requis");
+    const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
+    if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    const { error } = await supabase.from("operators").insert([{
+      name: opForm.name,
+      type: opForm.type,
+      region: opForm.region || null,
+      contact_email: opForm.contact_email || null,
+      contact_phone: opForm.contact_phone || null,
+      latitude: lat,
+      longitude: lng,
+    }]);
+    if (error) return toast.error(error.message);
+    toast.success("Opérateur ajouté");
+    setOpOpen(false);
+    refresh();
+  }
+
     <div className="space-y-6">
       <PageHeader
         title="Cartographie cyber"
