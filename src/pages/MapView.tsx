@@ -118,7 +118,8 @@ export default function MapView() {
     const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
     if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
     const { error } = await supabase.from("map_markers").insert([{
-      type: form.type, title: form.title, description: form.description || null,
+      type: form.type as "incident" | "signalement" | "travaux" | "maintenance",
+      title: form.title, description: form.description || null,
       latitude: lat, longitude: lng, created_by: user.id,
     }]);
     if (error) return toast.error(error.message);
