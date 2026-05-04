@@ -207,6 +207,54 @@ export type Database = {
         }
         Relationships: []
       }
+      operations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ended_at: string | null
+          id: string
+          operator_id: string | null
+          owner_id: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
+          started_at: string | null
+          status: Database["public"]["Enums"]["operation_status"]
+          title: string
+          type: Database["public"]["Enums"]["operation_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          operator_id?: string | null
+          owner_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["operation_status"]
+          title: string
+          type?: Database["public"]["Enums"]["operation_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          operator_id?: string | null
+          owner_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["operation_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["operation_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       operators: {
         Row: {
           compliance_score: number | null
@@ -317,6 +365,39 @@ export type Database = {
         }
         Relationships: []
       }
+      system_logs: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          level: Database["public"]["Enums"]["log_level"]
+          metadata: Json | null
+          target: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          level?: Database["public"]["Enums"]["log_level"]
+          metadata?: Json | null
+          target?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          level?: Database["public"]["Enums"]["log_level"]
+          metadata?: Json | null
+          target?: string | null
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           category: string | null
@@ -411,6 +492,20 @@ export type Database = {
         | "apt"
         | "ransomware"
         | "phishing_campaign"
+        | "other"
+      log_level: "info" | "warning" | "error" | "critical" | "debug"
+      operation_status:
+        | "planned"
+        | "ongoing"
+        | "paused"
+        | "completed"
+        | "cancelled"
+      operation_type:
+        | "investigation"
+        | "response"
+        | "audit"
+        | "monitoring"
+        | "exercise"
         | "other"
       operator_type: "telecom" | "isp"
       report_type: "weekly" | "monthly" | "incident" | "audit"
@@ -566,6 +661,22 @@ export const Constants = {
         "apt",
         "ransomware",
         "phishing_campaign",
+        "other",
+      ],
+      log_level: ["info", "warning", "error", "critical", "debug"],
+      operation_status: [
+        "planned",
+        "ongoing",
+        "paused",
+        "completed",
+        "cancelled",
+      ],
+      operation_type: [
+        "investigation",
+        "response",
+        "audit",
+        "monitoring",
+        "exercise",
         "other",
       ],
       operator_type: ["telecom", "isp"],
