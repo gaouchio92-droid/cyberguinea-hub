@@ -581,6 +581,66 @@ export default function MapView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={opOpen} onOpenChange={setOpOpen}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Ajouter un opérateur / FAI</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={opForm.name} onChange={e => setOpForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Orange Guinée" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Type</Label>
+                <Select value={opForm.type} onValueChange={(v: any) => setOpForm(f => ({ ...f, type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="telecom">Opérateur télécom</SelectItem>
+                    <SelectItem value="isp">FAI</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Région</Label>
+                <Input value={opForm.region} onChange={e => setOpForm(f => ({ ...f, region: e.target.value }))} placeholder="Conakry" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Email</Label>
+                <Input value={opForm.contact_email} onChange={e => setOpForm(f => ({ ...f, contact_email: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Téléphone</Label>
+                <Input value={opForm.contact_phone} onChange={e => setOpForm(f => ({ ...f, contact_phone: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Latitude</Label>
+                <Input value={opForm.latitude} onChange={e => setOpForm(f => ({ ...f, latitude: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Longitude</Label>
+                <Input value={opForm.longitude} onChange={e => setOpForm(f => ({ ...f, longitude: e.target.value }))} />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="flex-1" onClick={useMyLocationOperator}>
+                <Crosshair className="h-4 w-4 mr-1" />Ma position GPS
+              </Button>
+              <Button size="sm" variant="outline" className="flex-1" onClick={() => { setOpOpen(false); setOpPickMode(true); toast.info("Cliquez sur la carte pour positionner l'opérateur"); }}>
+                <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
+              </Button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpOpen(false)}>Annuler</Button>
+            <Button onClick={submitOperator}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
