@@ -157,6 +157,7 @@ export default function MapView() {
 
   function startReport() {
     setForm({ type: "incident", title: "", description: "", latitude: "", longitude: "" });
+    setFormAccuracy(null);
     setReportOpen(true);
   }
 
@@ -164,6 +165,9 @@ export default function MapView() {
     if (!user) return toast.error("Vous devez être connecté");
     const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
     if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
+    if (formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M) {
+      return toast.error(`Ajout bloqué : précision GPS ±${Math.round(formAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
+    }
     const { error } = await supabase.from("map_markers").insert([{
       type: form.type as "incident" | "signalement" | "travaux" | "maintenance",
       title: form.title, description: form.description || null,
@@ -246,6 +250,7 @@ export default function MapView() {
 
   function startAddOperator() {
     setOpForm({ name: "", type: "telecom", region: "", contact_email: "", contact_phone: "", latitude: "", longitude: "" });
+    setOpFormAccuracy(null);
     setOpOpen(true);
   }
 
@@ -270,6 +275,9 @@ export default function MapView() {
     if (!opForm.name.trim()) return toast.error("Nom requis");
     const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
     if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    if (opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M) {
+      return toast.error(`Ajout bloqué : précision GPS ±${Math.round(opFormAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
+    }
     const { error } = await supabase.from("operators").insert([{
       name: opForm.name,
       type: opForm.type,
@@ -360,6 +368,7 @@ export default function MapView() {
           {pickMode && (
             <ClickToPlace onPick={(c) => {
               setForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setFormAccuracy(null);
               setPickMode(false);
               setReportOpen(true);
               toast.success("Position sélectionnée");
@@ -373,6 +382,7 @@ export default function MapView() {
           {opPickMode && (
             <ClickToPlace onPick={(c) => {
               setOpForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setOpFormAccuracy(null);
               setOpPickMode(false);
               setOpOpen(true);
               toast.success("Position sélectionnée");
