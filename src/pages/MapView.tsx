@@ -178,13 +178,26 @@ export default function MapView() {
         {([["all","Tout"],["operators","Opérateurs"],["incidents","Incidents"],["fiber","Liens fibre"],["markers","Signalements"]] as const).map(([k,v])=>(
           <Button key={k} size="sm" variant={layer===k?"default":"outline"} onClick={()=>setLayer(k)}>{v}</Button>
         ))}
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex gap-2 flex-wrap">
           <Button size="sm" variant={pickMode?"default":"outline"} onClick={()=>setPickMode(p=>!p)}>
             <Crosshair className="h-4 w-4 mr-1" />{pickMode?"Cliquez sur la carte…":"Choisir sur carte"}
           </Button>
           <Button size="sm" onClick={startReport}>
             <MapPin className="h-4 w-4 mr-1" />Signaler ici
           </Button>
+          <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
+            {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
+          </Button>
+          {drawMode && drawPoints.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => setDrawPoints(p => p.slice(0, -1))}>
+              Annuler dernier point
+            </Button>
+          )}
+          {drawMode && (
+            <Button size="sm" variant="ghost" onClick={() => { setDrawMode(false); setDrawPoints([]); }}>
+              Abandonner
+            </Button>
+          )}
         </div>
       </div>
 
