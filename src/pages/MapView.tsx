@@ -87,6 +87,24 @@ export default function MapView() {
     contact_email: "", contact_phone: "", latitude: "", longitude: "",
   });
 
+  // --- Position temps réel de l'utilisateur ---
+  const [myPos, setMyPos] = useState<[number, number] | null>(null);
+  const [myAccuracy, setMyAccuracy] = useState<number | null>(null);
+  const [tracking, setTracking] = useState(false);
+
+  useEffect(() => {
+    if (!tracking || !navigator.geolocation) return;
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        setMyPos([pos.coords.latitude, pos.coords.longitude]);
+        setMyAccuracy(pos.coords.accuracy);
+      },
+      (err) => toast.error("Géolocalisation: " + err.message),
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
+    );
+    return () => navigator.geolocation.clearWatch(id);
+  }, [tracking]);
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
@@ -276,6 +294,9 @@ export default function MapView() {
           <Button size="sm" variant="outline" onClick={startAddOperator}>
             <Building2 className="h-4 w-4 mr-1" />Ajouter opérateur / FAI
           </Button>
+          <Button size="sm" variant={tracking ? "default" : "outline"} onClick={() => setTracking(t => !t)}>
+            <Crosshair className="h-4 w-4 mr-1" />{tracking ? "Position en direct ●" : "Me localiser"}
+          </Button>
           <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
             {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
           </Button>
@@ -304,6 +325,25 @@ export default function MapView() {
       <Card className="p-0 overflow-hidden gradient-card border-border" style={{ height: "70vh" }}>
         <MapContainer center={GUINEA_CENTER} zoom={7} scrollWheelZoom style={{ height: "100%", width: "100%" }}>
           <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+          {myPos && (
+            <>
+              {myAccuracy && (
+                <CircleMarker center={myPos} radius={Math.min(40, Math.max(8, myAccuracy / 10))}
+                  pathOptions={{ color: "#3b82f6", fillColor: "#3b82f6", fillOpacity: 0.15, weight: 1 }} />
+              )}
+              <CircleMarker center={myPos} radius={7}
+                pathOptions={{ color: "#fff", fillColor: "#3b82f6", fillOpacity: 1, weight: 3 }}>
+                <Popup>
+                  <div className="space-y-1 min-w-[160px]">
+                    <div className="font-semibold flex items-center gap-1"><Crosshair className="h-3 w-3" />Ma position</div>
+                    <div className="text-[11px]">{myPos[0].toFixed(5)}, {myPos[1].toFixed(5)}</div>
+                    {myAccuracy && <div className="text-[10px] text-muted-foreground">Précision ±{Math.round(myAccuracy)} m</div>}
+                  </div>
+                </Popup>
+              </CircleMarker>
+            </>
+          )}
 
           {pickMode && (
             <ClickToPlace onPick={(c) => {
