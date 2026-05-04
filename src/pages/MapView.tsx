@@ -75,6 +75,10 @@ export default function MapView() {
   const [fiberDialogOpen, setFiberDialogOpen] = useState(false);
   const [fiberForm, setFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "" });
 
+  // --- Edition d'un lien fibre existant ---
+  const [editingFiber, setEditingFiber] = useState<any | null>(null);
+  const [editFiberForm, setEditFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "", status: "active" });
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
