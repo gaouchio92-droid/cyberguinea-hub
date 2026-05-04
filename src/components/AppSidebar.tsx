@@ -36,6 +36,7 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const { signOut, user, isAdmin } = useAuth();
   const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+  const [mapOpen, setMapOpen] = useState(false);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
