@@ -13,6 +13,7 @@ import Intel from "./pages/Intel";
 import Operators from "./pages/Operators";
 import Reports from "./pages/Reports";
 import Operations from "./pages/Operations";
+import MapView from "./pages/MapView";
 import SystemLogs from "./pages/SystemLogs";
 import Assistant from "./pages/Assistant";
 import Documentation from "./pages/Documentation";
@@ -41,6 +42,7 @@ const App = () => (
               <Route path="/intel" element={<Intel />} />
               <Route path="/operators" element={<Operators />} />
               <Route path="/operations" element={<Operations />} />
+              <Route path="/map" element={<MapView />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/assistant" element={<Assistant />} />
               <Route path="/documentation" element={<Documentation />} />
