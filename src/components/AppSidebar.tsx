@@ -60,13 +60,25 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map(item => {
                 const active = pathname === item.url;
+                const isMap = item.url === "/map";
                 return (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <NavLink to={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                    <SidebarMenuButton asChild isActive={active && !isMap}>
+                      {isMap ? (
+                        <button
+                          type="button"
+                          onClick={() => setMapOpen(true)}
+                          className="flex items-center gap-3 w-full text-left"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </button>
+                      ) : (
+                        <NavLink to={item.url} className="flex items-center gap-3">
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
