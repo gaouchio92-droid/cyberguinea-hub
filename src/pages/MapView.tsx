@@ -79,6 +79,14 @@ export default function MapView() {
   const [editingFiber, setEditingFiber] = useState<any | null>(null);
   const [editFiberForm, setEditFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "", status: "active" });
 
+  // --- Ajout opérateur / FAI ---
+  const [opOpen, setOpOpen] = useState(false);
+  const [opPickMode, setOpPickMode] = useState(false);
+  const [opForm, setOpForm] = useState({
+    name: "", type: "telecom" as "telecom" | "isp", region: "",
+    contact_email: "", contact_phone: "", latitude: "", longitude: "",
+  });
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
