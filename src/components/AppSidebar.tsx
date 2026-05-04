@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map,
@@ -6,8 +7,10 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import MapView from "@/pages/MapView";
 import arptLogo from "@/assets/arpt-logo.png";
 
 const baseItems = [
