@@ -171,6 +171,42 @@ export default function MapView() {
     refresh();
   }
 
+  function openEditFiber(fl: any) {
+    setEditingFiber(fl);
+    setEditFiberForm({
+      name: fl.name ?? "",
+      description: fl.description ?? "",
+      color: fl.color ?? "#3b82f6",
+      operator_id: fl.operator_id ?? "",
+      status: fl.status ?? "active",
+    });
+  }
+
+  async function saveEditFiber() {
+    if (!editingFiber) return;
+    if (!editFiberForm.name.trim()) return toast.error("Nom requis");
+    const { error } = await supabase.from("fiber_links").update({
+      name: editFiberForm.name,
+      description: editFiberForm.description || null,
+      color: editFiberForm.color,
+      operator_id: editFiberForm.operator_id || null,
+      status: editFiberForm.status,
+    }).eq("id", editingFiber.id);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre mis à jour");
+    setEditingFiber(null);
+    refresh();
+  }
+
+  async function deleteFiber(id: string) {
+    if (!confirm("Supprimer ce lien fibre ?")) return;
+    const { error } = await supabase.from("fiber_links").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Lien fibre supprimé");
+    setEditingFiber(null);
+    refresh();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
