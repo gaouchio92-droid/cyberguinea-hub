@@ -318,7 +318,7 @@ export default function MapView() {
                     </Popup>
                   </CircleMarker>
                 ))}
-              </div>
+              </React.Fragment>
             );
           })}
 
