@@ -345,6 +345,8 @@ export type Database = {
           id: string
           last_sync_summary: string | null
           last_synced_at: string | null
+          latitude: number | null
+          longitude: number | null
           name: string
           notes: string | null
           region: string | null
@@ -360,6 +362,8 @@ export type Database = {
           id?: string
           last_sync_summary?: string | null
           last_synced_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name: string
           notes?: string | null
           region?: string | null
@@ -375,6 +379,8 @@ export type Database = {
           id?: string
           last_sync_summary?: string | null
           last_synced_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
           name?: string
           notes?: string | null
           region?: string | null
