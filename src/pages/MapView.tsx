@@ -69,6 +69,12 @@ export default function MapView() {
     title: "", description: "", latitude: "", longitude: "",
   });
 
+  // --- Mode tracer un lien fibre ---
+  const [drawMode, setDrawMode] = useState(false);
+  const [drawPoints, setDrawPoints] = useState<[number, number][]>([]);
+  const [fiberDialogOpen, setFiberDialogOpen] = useState(false);
+  const [fiberForm, setFiberForm] = useState({ name: "", description: "", color: "#3b82f6", operator_id: "" });
+
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
       supabase.from("operators").select("*"),
