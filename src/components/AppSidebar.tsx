@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map,
@@ -6,8 +7,10 @@ import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter, useSidebar,
 } from "@/components/ui/sidebar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import MapView from "@/pages/MapView";
 import arptLogo from "@/assets/arpt-logo.png";
 
 const baseItems = [
@@ -33,8 +36,10 @@ export function AppSidebar() {
   const { pathname } = useLocation();
   const { signOut, user, isAdmin } = useAuth();
   const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+  const [mapOpen, setMapOpen] = useState(false);
 
   return (
+    <>
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-3">
@@ -56,13 +61,25 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map(item => {
                 const active = pathname === item.url;
+                const isMap = item.url === "/map";
                 return (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active}>
-                      <NavLink to={item.url} className="flex items-center gap-3">
-                        <item.icon className="h-4 w-4 shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
-                      </NavLink>
+                    <SidebarMenuButton asChild isActive={active && !isMap}>
+                      {isMap ? (
+                        <button
+                          type="button"
+                          onClick={() => setMapOpen(true)}
+                          className="flex items-center gap-3 w-full text-left"
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </button>
+                      ) : (
+                        <NavLink to={item.url} className="flex items-center gap-3">
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      )}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -84,5 +101,16 @@ export function AppSidebar() {
         </Button>
       </SidebarFooter>
     </Sidebar>
+    <Dialog open={mapOpen} onOpenChange={setMapOpen}>
+      <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-4 overflow-auto">
+        <DialogHeader>
+          <DialogTitle>Cartographie</DialogTitle>
+        </DialogHeader>
+        <div className="flex-1 min-h-0">
+          <MapView />
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
