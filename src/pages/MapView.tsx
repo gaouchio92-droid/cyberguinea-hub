@@ -549,10 +549,17 @@ export default function MapView() {
                 <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
               </Button>
             </div>
+            {formAccuracy !== null && (
+              <div className={`text-xs px-2 py-1.5 rounded border ${formAccuracy > GPS_ACCURACY_THRESHOLD_M ? "bg-destructive/10 border-destructive text-destructive" : formAccuracy > GPS_ACCURACY_WARN_M ? "bg-yellow-500/10 border-yellow-500 text-yellow-700 dark:text-yellow-400" : "bg-green-500/10 border-green-500 text-green-700 dark:text-green-400"}`}>
+                Précision GPS : ±{Math.round(formAccuracy)} m
+                {formAccuracy > GPS_ACCURACY_THRESHOLD_M && ` — ajout bloqué (seuil ${GPS_ACCURACY_THRESHOLD_M} m)`}
+                {formAccuracy > GPS_ACCURACY_WARN_M && formAccuracy <= GPS_ACCURACY_THRESHOLD_M && " — précision faible"}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportOpen(false)}>Annuler</Button>
-            <Button onClick={submitReport}>Enregistrer</Button>
+            <Button onClick={submitReport} disabled={formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -696,10 +703,17 @@ export default function MapView() {
                 <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
               </Button>
             </div>
+            {opFormAccuracy !== null && (
+              <div className={`text-xs px-2 py-1.5 rounded border ${opFormAccuracy > GPS_ACCURACY_THRESHOLD_M ? "bg-destructive/10 border-destructive text-destructive" : opFormAccuracy > GPS_ACCURACY_WARN_M ? "bg-yellow-500/10 border-yellow-500 text-yellow-700 dark:text-yellow-400" : "bg-green-500/10 border-green-500 text-green-700 dark:text-green-400"}`}>
+                Précision GPS : ±{Math.round(opFormAccuracy)} m
+                {opFormAccuracy > GPS_ACCURACY_THRESHOLD_M && ` — ajout bloqué (seuil ${GPS_ACCURACY_THRESHOLD_M} m)`}
+                {opFormAccuracy > GPS_ACCURACY_WARN_M && opFormAccuracy <= GPS_ACCURACY_THRESHOLD_M && " — précision faible"}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpOpen(false)}>Annuler</Button>
-            <Button onClick={submitOperator}>Enregistrer</Button>
+            <Button onClick={submitOperator} disabled={opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
