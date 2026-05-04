@@ -69,7 +69,7 @@ export default function Operations() {
   }
 
   async function updateStatus(id: string, status: string, title: string) {
-    const { error } = await supabase.from("operations").update({ status }).eq("id", id);
+    const { error } = await supabase.from("operations").update({ status: status as any }).eq("id", id);
     if (error) return toast.error(error.message);
     await supabase.from("system_logs").insert({
       actor_id: user?.id, actor_email: user?.email, action: `operation.status.${status}`, target: title, level: "info",
