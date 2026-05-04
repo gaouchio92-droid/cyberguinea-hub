@@ -30,6 +30,8 @@ const REGION_COORDS: Record<string, [number, number]> = {
   Kankan: [10.3856, -9.3057], Nzérékoré: [7.7561, -8.8178], Nzerekore: [7.7561, -8.8178], Siguiri: [11.4174, -9.1700],
 };
 const GUINEA_CENTER: [number, number] = [10.4, -11.0];
+const GPS_ACCURACY_THRESHOLD_M = 50; // au-delà : ajout bloqué
+const GPS_ACCURACY_WARN_M = 25; // au-delà : avertissement
 const severityColor: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e" };
 
 const MARKER_META: Record<string, { color: string; emoji: string; label: string; Icon: any }> = {
@@ -68,6 +70,8 @@ export default function MapView() {
     type: "incident" as keyof typeof MARKER_META,
     title: "", description: "", latitude: "", longitude: "",
   });
+  const [formAccuracy, setFormAccuracy] = useState<number | null>(null);
+  const [opFormAccuracy, setOpFormAccuracy] = useState<number | null>(null);
 
   // --- Mode tracer un lien fibre ---
   const [drawMode, setDrawMode] = useState(false);
@@ -139,8 +143,12 @@ export default function MapView() {
     if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const acc = pos.coords.accuracy;
         setForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        toast.success("Position GPS récupérée");
+        setFormAccuracy(acc);
+        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
+        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
+        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
       },
       () => toast.error("Impossible de récupérer la position"),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -245,8 +253,12 @@ export default function MapView() {
     if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const acc = pos.coords.accuracy;
         setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        toast.success("Position GPS récupérée");
+        setOpFormAccuracy(acc);
+        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
+        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
+        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
       },
       () => toast.error("Impossible de récupérer la position"),
       { enableHighAccuracy: true, timeout: 10000 }
