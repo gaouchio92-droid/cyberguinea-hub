@@ -294,6 +294,9 @@ export default function MapView() {
           <Button size="sm" variant="outline" onClick={startAddOperator}>
             <Building2 className="h-4 w-4 mr-1" />Ajouter opérateur / FAI
           </Button>
+          <Button size="sm" variant={tracking ? "default" : "outline"} onClick={() => setTracking(t => !t)}>
+            <Crosshair className="h-4 w-4 mr-1" />{tracking ? "Position en direct ●" : "Me localiser"}
+          </Button>
           <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
             {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
           </Button>
