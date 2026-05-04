@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -14,6 +14,7 @@ const baseItems = [
   { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
   { title: "Planning & Tâches", url: "/tasks", icon: ListChecks },
   { title: "Incidents", url: "/incidents", icon: ShieldAlert },
+  { title: "Opérations", url: "/operations", icon: Activity },
   { title: "Threat Intelligence", url: "/intel", icon: Radar },
   { title: "Opérateurs & Audits", url: "/operators", icon: Building2 },
   { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
@@ -22,6 +23,7 @@ const baseItems = [
 ];
 const adminItems = [
   { title: "Utilisateurs", url: "/users", icon: Users },
+  { title: "Journal système", url: "/system-logs", icon: ScrollText },
 ];
 
 export function AppSidebar() {

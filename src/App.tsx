@@ -12,6 +12,8 @@ import IncidentDetail from "./pages/IncidentDetail";
 import Intel from "./pages/Intel";
 import Operators from "./pages/Operators";
 import Reports from "./pages/Reports";
+import Operations from "./pages/Operations";
+import SystemLogs from "./pages/SystemLogs";
 import Assistant from "./pages/Assistant";
 import Documentation from "./pages/Documentation";
 import AuthPage from "./pages/Auth";
@@ -38,9 +40,11 @@ const App = () => (
               <Route path="/incidents/:id" element={<IncidentDetail />} />
               <Route path="/intel" element={<Intel />} />
               <Route path="/operators" element={<Operators />} />
+              <Route path="/operations" element={<Operations />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/assistant" element={<Assistant />} />
               <Route path="/documentation" element={<Documentation />} />
+              <Route path="/system-logs" element={<SystemLogs />} />
               <Route path="/users" element={<Users />} />
             </Route>
             <Route path="*" element={<NotFound />} />
