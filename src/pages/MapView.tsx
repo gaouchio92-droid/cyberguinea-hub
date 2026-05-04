@@ -470,6 +470,57 @@ export default function MapView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!editingFiber} onOpenChange={(o) => { if (!o) setEditingFiber(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Modifier le lien fibre</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={editFiberForm.name} onChange={e => setEditFiberForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={editFiberForm.description} onChange={e => setEditFiberForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <Label>Couleur</Label>
+                <Input type="color" value={editFiberForm.color} onChange={e => setEditFiberForm(f => ({ ...f, color: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Statut</Label>
+                <Select value={editFiberForm.status} onValueChange={(v) => setEditFiberForm(f => ({ ...f, status: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Actif</SelectItem>
+                    <SelectItem value="degraded">Dégradé</SelectItem>
+                    <SelectItem value="down">Coupé</SelectItem>
+                    <SelectItem value="planned">Planifié</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Opérateur</Label>
+                <Select value={editFiberForm.operator_id || "none"} onValueChange={(v) => setEditFiberForm(f => ({ ...f, operator_id: v === "none" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Aucun</SelectItem>
+                    {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex-row justify-between sm:justify-between">
+            <Button variant="destructive" onClick={() => editingFiber && deleteFiber(editingFiber.id)}>Supprimer</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setEditingFiber(null)}>Annuler</Button>
+              <Button onClick={saveEditFiber}>Enregistrer</Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
