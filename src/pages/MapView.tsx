@@ -318,6 +318,15 @@ export default function MapView() {
             <ClickToPlace onPick={(c) => setDrawPoints(p => [...p, c])} />
           )}
 
+          {opPickMode && (
+            <ClickToPlace onPick={(c) => {
+              setOpForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setOpPickMode(false);
+              setOpOpen(true);
+              toast.success("Position sélectionnée");
+            }} />
+          )}
+
           {drawMode && drawPoints.length > 0 && (
             <>
               <Polyline positions={drawPoints} pathOptions={{ color: fiberForm.color || "#3b82f6", weight: 4, dashArray: "8 6", opacity: 0.9 }} />
