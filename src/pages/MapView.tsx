@@ -365,6 +365,42 @@ export default function MapView() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={fiberDialogOpen} onOpenChange={(o) => { setFiberDialogOpen(o); if (!o) setDrawPoints([]); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Nouveau lien fibre ({drawPoints.length} points)</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <Label>Nom</Label>
+              <Input value={fiberForm.name} onChange={e => setFiberForm(f => ({ ...f, name: e.target.value }))} placeholder="Ex: Backbone Conakry – Kindia" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea value={fiberForm.description} onChange={e => setFiberForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label>Couleur</Label>
+                <Input type="color" value={fiberForm.color} onChange={e => setFiberForm(f => ({ ...f, color: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Opérateur</Label>
+                <Select value={fiberForm.operator_id || "none"} onValueChange={(v) => setFiberForm(f => ({ ...f, operator_id: v === "none" ? "" : v }))}>
+                  <SelectTrigger><SelectValue placeholder="Aucun" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Aucun</SelectItem>
+                    {operators.map(op => <SelectItem key={op.id} value={op.id}>{op.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setFiberDialogOpen(false); setDrawPoints([]); }}>Annuler</Button>
+            <Button onClick={submitFiberLink}>Enregistrer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
