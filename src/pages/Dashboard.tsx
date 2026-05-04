@@ -104,7 +104,7 @@ export default function Dashboard() {
           <h3 className="font-semibold mb-4">Répartition par sévérité</h3>
           <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={bySeverity} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={45}>
+              <Pie data={bySeverity} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={45} isAnimationActive={false}>
                 {bySeverity.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
