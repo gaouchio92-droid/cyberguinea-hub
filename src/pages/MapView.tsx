@@ -281,15 +281,44 @@ export default function MapView() {
             const coords = Array.isArray(fl.coordinates) ? fl.coordinates as [number,number][] : [];
             if (coords.length < 2) return null;
             return (
-              <Polyline key={fl.id} positions={coords} pathOptions={{ color: fl.color || "#3b82f6", weight: 4, opacity: 0.8 }}>
-                <Popup>
-                  <div className="space-y-1 min-w-[180px]">
-                    <div className="font-semibold">{fl.name}</div>
-                    {fl.description && <div className="text-xs">{fl.description}</div>}
-                    <Badge variant="outline">{fl.status}</Badge>
-                  </div>
-                </Popup>
-              </Polyline>
+              <div key={fl.id}>
+                <Polyline positions={coords} pathOptions={{ color: fl.color || "#3b82f6", weight: 5, opacity: 0.85 }}>
+                  <Popup>
+                    <div className="space-y-2 min-w-[200px]">
+                      <div className="font-semibold flex items-center gap-2">
+                        <span className="inline-block w-3 h-3 rounded-sm" style={{ background: fl.color || "#3b82f6" }} />
+                        {fl.name}
+                      </div>
+                      {fl.description && <div className="text-xs">{fl.description}</div>}
+                      <div className="text-xs flex gap-2">
+                        <Badge variant="outline">{fl.status}</Badge>
+                        <Badge variant="secondary">{coords.length} pts</Badge>
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditFiber(fl)}>Modifier</Button>
+                        <Button size="sm" variant="destructive" className="flex-1" onClick={() => deleteFiber(fl.id)}>Supprimer</Button>
+                      </div>
+                    </div>
+                  </Popup>
+                </Polyline>
+                {coords.map((p, i) => (
+                  <CircleMarker key={`${fl.id}-${i}`} center={p} radius={4}
+                    pathOptions={{ color: "#fff", fillColor: fl.color || "#3b82f6", fillOpacity: 1, weight: 2 }}
+                    eventHandlers={{ click: () => openEditFiber(fl) }}>
+                    <Popup>
+                      <div className="space-y-2 min-w-[180px]">
+                        <div className="font-semibold text-sm">{fl.name}</div>
+                        <div className="text-xs text-muted-foreground">Point {i + 1} / {coords.length}</div>
+                        <div className="text-[10px] text-muted-foreground">{p[0].toFixed(4)}, {p[1].toFixed(4)}</div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" className="flex-1" onClick={() => openEditFiber(fl)}>Modifier</Button>
+                          <Button size="sm" variant="destructive" className="flex-1" onClick={() => deleteFiber(fl.id)}>Supprimer</Button>
+                        </div>
+                      </div>
+                    </Popup>
+                  </CircleMarker>
+                ))}
+              </div>
             );
           })}
 
