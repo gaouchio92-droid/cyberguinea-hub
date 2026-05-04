@@ -30,6 +30,8 @@ const REGION_COORDS: Record<string, [number, number]> = {
   Kankan: [10.3856, -9.3057], Nzérékoré: [7.7561, -8.8178], Nzerekore: [7.7561, -8.8178], Siguiri: [11.4174, -9.1700],
 };
 const GUINEA_CENTER: [number, number] = [10.4, -11.0];
+const GPS_ACCURACY_THRESHOLD_M = 50; // au-delà : ajout bloqué
+const GPS_ACCURACY_WARN_M = 25; // au-delà : avertissement
 const severityColor: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e" };
 
 const MARKER_META: Record<string, { color: string; emoji: string; label: string; Icon: any }> = {
@@ -68,6 +70,8 @@ export default function MapView() {
     type: "incident" as keyof typeof MARKER_META,
     title: "", description: "", latitude: "", longitude: "",
   });
+  const [formAccuracy, setFormAccuracy] = useState<number | null>(null);
+  const [opFormAccuracy, setOpFormAccuracy] = useState<number | null>(null);
 
   // --- Mode tracer un lien fibre ---
   const [drawMode, setDrawMode] = useState(false);
@@ -139,8 +143,12 @@ export default function MapView() {
     if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const acc = pos.coords.accuracy;
         setForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        toast.success("Position GPS récupérée");
+        setFormAccuracy(acc);
+        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
+        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
+        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
       },
       () => toast.error("Impossible de récupérer la position"),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -149,6 +157,7 @@ export default function MapView() {
 
   function startReport() {
     setForm({ type: "incident", title: "", description: "", latitude: "", longitude: "" });
+    setFormAccuracy(null);
     setReportOpen(true);
   }
 
@@ -156,6 +165,9 @@ export default function MapView() {
     if (!user) return toast.error("Vous devez être connecté");
     const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
     if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
+    if (formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M) {
+      return toast.error(`Ajout bloqué : précision GPS ±${Math.round(formAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
+    }
     const { error } = await supabase.from("map_markers").insert([{
       type: form.type as "incident" | "signalement" | "travaux" | "maintenance",
       title: form.title, description: form.description || null,
@@ -238,6 +250,7 @@ export default function MapView() {
 
   function startAddOperator() {
     setOpForm({ name: "", type: "telecom", region: "", contact_email: "", contact_phone: "", latitude: "", longitude: "" });
+    setOpFormAccuracy(null);
     setOpOpen(true);
   }
 
@@ -245,8 +258,12 @@ export default function MapView() {
     if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        const acc = pos.coords.accuracy;
         setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        toast.success("Position GPS récupérée");
+        setOpFormAccuracy(acc);
+        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
+        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
+        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
       },
       () => toast.error("Impossible de récupérer la position"),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -258,6 +275,9 @@ export default function MapView() {
     if (!opForm.name.trim()) return toast.error("Nom requis");
     const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
     if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    if (opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M) {
+      return toast.error(`Ajout bloqué : précision GPS ±${Math.round(opFormAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
+    }
     const { error } = await supabase.from("operators").insert([{
       name: opForm.name,
       type: opForm.type,
@@ -348,6 +368,7 @@ export default function MapView() {
           {pickMode && (
             <ClickToPlace onPick={(c) => {
               setForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setFormAccuracy(null);
               setPickMode(false);
               setReportOpen(true);
               toast.success("Position sélectionnée");
@@ -361,6 +382,7 @@ export default function MapView() {
           {opPickMode && (
             <ClickToPlace onPick={(c) => {
               setOpForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
+              setOpFormAccuracy(null);
               setOpPickMode(false);
               setOpOpen(true);
               toast.success("Position sélectionnée");
@@ -527,10 +549,17 @@ export default function MapView() {
                 <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
               </Button>
             </div>
+            {formAccuracy !== null && (
+              <div className={`text-xs px-2 py-1.5 rounded border ${formAccuracy > GPS_ACCURACY_THRESHOLD_M ? "bg-destructive/10 border-destructive text-destructive" : formAccuracy > GPS_ACCURACY_WARN_M ? "bg-yellow-500/10 border-yellow-500 text-yellow-700 dark:text-yellow-400" : "bg-green-500/10 border-green-500 text-green-700 dark:text-green-400"}`}>
+                Précision GPS : ±{Math.round(formAccuracy)} m
+                {formAccuracy > GPS_ACCURACY_THRESHOLD_M && ` — ajout bloqué (seuil ${GPS_ACCURACY_THRESHOLD_M} m)`}
+                {formAccuracy > GPS_ACCURACY_WARN_M && formAccuracy <= GPS_ACCURACY_THRESHOLD_M && " — précision faible"}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setReportOpen(false)}>Annuler</Button>
-            <Button onClick={submitReport}>Enregistrer</Button>
+            <Button onClick={submitReport} disabled={formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -674,10 +703,17 @@ export default function MapView() {
                 <MapPin className="h-4 w-4 mr-1" />Choisir sur carte
               </Button>
             </div>
+            {opFormAccuracy !== null && (
+              <div className={`text-xs px-2 py-1.5 rounded border ${opFormAccuracy > GPS_ACCURACY_THRESHOLD_M ? "bg-destructive/10 border-destructive text-destructive" : opFormAccuracy > GPS_ACCURACY_WARN_M ? "bg-yellow-500/10 border-yellow-500 text-yellow-700 dark:text-yellow-400" : "bg-green-500/10 border-green-500 text-green-700 dark:text-green-400"}`}>
+                Précision GPS : ±{Math.round(opFormAccuracy)} m
+                {opFormAccuracy > GPS_ACCURACY_THRESHOLD_M && ` — ajout bloqué (seuil ${GPS_ACCURACY_THRESHOLD_M} m)`}
+                {opFormAccuracy > GPS_ACCURACY_WARN_M && opFormAccuracy <= GPS_ACCURACY_THRESHOLD_M && " — précision faible"}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpOpen(false)}>Annuler</Button>
-            <Button onClick={submitOperator}>Enregistrer</Button>
+            <Button onClick={submitOperator} disabled={opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M}>Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
