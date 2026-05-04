@@ -326,6 +326,25 @@ export default function MapView() {
         <MapContainer center={GUINEA_CENTER} zoom={7} scrollWheelZoom style={{ height: "100%", width: "100%" }}>
           <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
+          {myPos && (
+            <>
+              {myAccuracy && (
+                <CircleMarker center={myPos} radius={Math.min(40, Math.max(8, myAccuracy / 10))}
+                  pathOptions={{ color: "#3b82f6", fillColor: "#3b82f6", fillOpacity: 0.15, weight: 1 }} />
+              )}
+              <CircleMarker center={myPos} radius={7}
+                pathOptions={{ color: "#fff", fillColor: "#3b82f6", fillOpacity: 1, weight: 3 }}>
+                <Popup>
+                  <div className="space-y-1 min-w-[160px]">
+                    <div className="font-semibold flex items-center gap-1"><Crosshair className="h-3 w-3" />Ma position</div>
+                    <div className="text-[11px]">{myPos[0].toFixed(5)}, {myPos[1].toFixed(5)}</div>
+                    {myAccuracy && <div className="text-[10px] text-muted-foreground">Précision ±{Math.round(myAccuracy)} m</div>}
+                  </div>
+                </Popup>
+              </CircleMarker>
+            </>
+          )}
+
           {pickMode && (
             <ClickToPlace onPick={(c) => {
               setForm(f => ({ ...f, latitude: c[0].toFixed(6), longitude: c[1].toFixed(6) }));
