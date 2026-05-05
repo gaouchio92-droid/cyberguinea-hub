@@ -238,13 +238,15 @@ export default function MapView() {
 
   async function saveEditFiber() {
     if (!editingFiber) return;
-    if (!editFiberForm.name.trim()) return toast.error("Nom requis");
+    const parsed = fiberLinkSchema.safeParse(editFiberForm);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("fiber_links").update({
-      name: editFiberForm.name,
-      description: editFiberForm.description || null,
-      color: editFiberForm.color,
-      operator_id: editFiberForm.operator_id || null,
-      status: editFiberForm.status,
+      name: v.name,
+      description: v.description || null,
+      color: v.color,
+      operator_id: v.operator_id || null,
+      status: v.status,
     }).eq("id", editingFiber.id);
     if (error) return toast.error(error.message);
     toast.success("Lien fibre mis à jour");
