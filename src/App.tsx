@@ -65,6 +65,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/avis" element={<PublicAvis />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/tasks" element={<Tasks />} />
@@ -75,6 +76,9 @@ const App = () => (
                 <Route path="/operations" element={<Operations />} />
                 <Route path="/map" element={<MapView />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/iocs" element={<Iocs />} />
+                <Route path="/bulletins" element={<Bulletins />} />
+                <Route path="/maturity" element={<Maturity />} />
                 <Route path="/assistant" element={<Assistant />} />
                 <Route path="/documentation" element={<Documentation />} />
                 <Route path="/system-logs" element={<SystemLogs />} />
