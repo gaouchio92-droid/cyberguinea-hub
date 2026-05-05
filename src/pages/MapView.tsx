@@ -206,13 +206,15 @@ export default function MapView() {
 
   async function submitFiberLink() {
     if (!user) return toast.error("Vous devez être connecté");
-    if (!fiberForm.name.trim()) return toast.error("Nom requis");
-    if (drawPoints.length < 2) return toast.error("Tracé invalide");
+    if (drawPoints.length < 2) return toast.error("Tracé invalide (min. 2 points)");
+    const parsed = fiberLinkSchema.safeParse(fiberForm);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("fiber_links").insert([{
-      name: fiberForm.name,
-      description: fiberForm.description || null,
-      color: fiberForm.color || "#3b82f6",
-      operator_id: fiberForm.operator_id || null,
+      name: v.name,
+      description: v.description || null,
+      color: v.color,
+      operator_id: v.operator_id || null,
       coordinates: drawPoints as any,
       created_by: user.id,
     }]);
