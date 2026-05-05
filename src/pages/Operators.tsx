@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil } from "lucide-react";
+import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { auditSchema, firstZodError } from "@/lib/validation";
+import { OperatorContactsDialog } from "@/components/OperatorContactsDialog";
 
 export default function Operators() {
   const { user, isAdmin, isAnalyst } = useAuth();
@@ -26,6 +27,7 @@ export default function Operators() {
   const [urlInput, setUrlInput] = useState("");
   const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
+  const [contactsOp, setContactsOp] = useState<{ id: string; name: string } | null>(null);
 
   async function load() {
     const [{ data: o }, { data: a }] = await Promise.all([
@@ -157,6 +159,9 @@ export default function Operators() {
                   </Button>
                 </div>
               )}
+              <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
+                <Phone className="h-3 w-3 mr-2" />Contacts 24/7
+              </Button>
               <Dialog open={auditOpen === o.id} onOpenChange={v => setAuditOpen(v ? o.id : null)}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline" className="w-full"><FileCheck className="h-3 w-3 mr-2" />Nouvel audit</Button>
@@ -220,6 +225,8 @@ export default function Operators() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <OperatorContactsDialog operator={contactsOp} open={!!contactsOp} onOpenChange={v => !v && setContactsOp(null)} />
     </div>
   );
 }

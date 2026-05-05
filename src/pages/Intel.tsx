@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Radar, ShieldAlert, Bug, Globe, RefreshCw } from "lucide-react";
 import { severityColor, severityLabel, Severity } from "@/lib/types";
+import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -24,7 +25,7 @@ export default function Intel() {
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "cve", severity: "medium" as Severity, region_impact: "", source: "", description: "", recommendations: "", cve_id: "" });
+  const [form, setForm] = useState({ title: "", category: "cve", severity: "medium" as Severity, region_impact: "", source: "", description: "", recommendations: "", cve_id: "", tlp: "green" as TLP });
 
   async function load() {
     const { data } = await supabase.from("intel_items").select("*").order("published_at", { ascending: false });
@@ -38,7 +39,7 @@ export default function Intel() {
     if (error) return toast.error(error.message);
     toast.success("Item ajouté");
     setOpen(false);
-    setForm({ title: "", category: "cve", severity: "medium", region_impact: "", source: "", description: "", recommendations: "", cve_id: "" });
+    setForm({ title: "", category: "cve", severity: "medium", region_impact: "", source: "", description: "", recommendations: "", cve_id: "", tlp: "green" });
     load();
   }
 
@@ -79,6 +80,12 @@ export default function Intel() {
                     </Select>
                   </div>
                 </div>
+                <div><Label>Classification TLP</Label>
+                  <Select value={form.tlp} onValueChange={(v: TLP) => setForm({ ...form, tlp: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{TLP_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label} — {o.desc}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
                 <div><Label>CVE ID (si applicable)</Label><Input value={form.cve_id} onChange={e => setForm({ ...form, cve_id: e.target.value })} /></div>
                 <div><Label>Région d'impact</Label><Input value={form.region_impact} onChange={e => setForm({ ...form, region_impact: e.target.value })} /></div>
                 <div><Label>Source</Label><Input value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} /></div>
@@ -113,6 +120,7 @@ export default function Intel() {
                     <Badge className={severityColor[i.severity as Severity]}>{severityLabel[i.severity as Severity]}</Badge>
                     <Badge variant="outline">{catLabel[i.category]}</Badge>
                     {i.cve_id && <Badge variant="secondary" className="font-mono text-[10px]">{i.cve_id}</Badge>}
+                    {i.tlp && <TLPBadge tlp={i.tlp as TLP} />}
                   </div>
                   <h3 className="font-semibold leading-tight">{i.title}</h3>
                 </div>

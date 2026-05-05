@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Download, FileText } from "lucide-react";
 import { incidentStatusLabel, incidentTypeLabel, severityColor, severityLabel, IncidentStatus, IncidentType, Severity } from "@/lib/types";
+import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { incidentSchema, firstZodError } from "@/lib/validation";
@@ -29,6 +30,7 @@ export default function Incidents() {
   const [form, setForm] = useState({
     title: "", description: "", type: "phishing" as IncidentType,
     severity: "medium" as Severity, status: "open" as IncidentStatus, operator_id: "", notes: "",
+    tlp: "amber" as TLP,
   });
 
   async function load() {
@@ -53,13 +55,14 @@ export default function Incidents() {
       status: v.status as IncidentStatus,
       notes: v.notes || null,
       operator_id: v.operator_id || null,
+      tlp: form.tlp,
       created_by: user.id,
       owner_id: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Incident créé");
     setOpen(false);
-    setForm({ title: "", description: "", type: "phishing", severity: "medium", status: "open", operator_id: "", notes: "" });
+    setForm({ title: "", description: "", type: "phishing", severity: "medium", status: "open", operator_id: "", notes: "", tlp: "amber" });
     load();
   }
 
@@ -148,6 +151,12 @@ export default function Incidents() {
                       <SelectContent>{operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
+                  <div><Label>Classification TLP</Label>
+                    <Select value={form.tlp} onValueChange={(v: TLP) => setForm({ ...form, tlp: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{TLP_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label} — {o.desc}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                   <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                   <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
                   <Button onClick={create} className="w-full">Créer l'incident</Button>
@@ -179,6 +188,7 @@ export default function Incidents() {
                   <Badge className={severityColor[i.severity as Severity]}>{severityLabel[i.severity as Severity]}</Badge>
                   <Badge variant="outline">{incidentTypeLabel[i.type as IncidentType]}</Badge>
                   <Badge variant="secondary">{incidentStatusLabel[i.status as IncidentStatus]}</Badge>
+                  {i.tlp && <TLPBadge tlp={i.tlp as TLP} />}
                 </div>
                 {i.description && <p className="text-sm text-muted-foreground mb-2">{i.description}</p>}
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
