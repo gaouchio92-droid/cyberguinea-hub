@@ -27,8 +27,10 @@ export default function AuthPage() {
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = signInSchema.safeParse({ email, password });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword(parsed.data);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Connexion réussie");
@@ -37,10 +39,13 @@ export default function AuthPage() {
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = signUpSchema.safeParse({ full_name: fullName, email, password });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
     const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: { emailRedirectTo: window.location.origin, data: { full_name: parsed.data.full_name } },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -61,8 +66,10 @@ export default function AuthPage() {
 
   async function forgotPassword(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
