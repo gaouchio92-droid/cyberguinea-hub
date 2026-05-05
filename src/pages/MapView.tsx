@@ -164,15 +164,25 @@ export default function MapView() {
 
   async function submitReport() {
     if (!user) return toast.error("Vous devez être connecté");
-    const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
-    if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
+    const parsed = mapMarkerSchema.safeParse({
+      type: form.type,
+      title: form.title,
+      description: form.description,
+      latitude: parseFloat(form.latitude),
+      longitude: parseFloat(form.longitude),
+    });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     if (formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M) {
       return toast.error(`Ajout bloqué : précision GPS ±${Math.round(formAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
     }
+    const v = parsed.data;
     const { error } = await supabase.from("map_markers").insert([{
-      type: form.type as "incident" | "signalement" | "travaux" | "maintenance",
-      title: form.title, description: form.description || null,
-      latitude: lat, longitude: lng, created_by: user.id,
+      type: v.type,
+      title: v.title,
+      description: v.description || null,
+      latitude: v.latitude,
+      longitude: v.longitude,
+      created_by: user.id,
     }]);
     if (error) return toast.error(error.message);
     toast.success("Signalement enregistré");
