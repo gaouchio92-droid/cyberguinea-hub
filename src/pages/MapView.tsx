@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { mapMarkerSchema, fiberLinkSchema, operatorSchema, firstZodError } from "@/lib/validation";
+import { useGeoWatch, getCurrentGeo, GPS_ACCURACY_THRESHOLD_M, GPS_ACCURACY_WARN_M } from "@/hooks/useGeo";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -31,8 +32,6 @@ const REGION_COORDS: Record<string, [number, number]> = {
   Kankan: [10.3856, -9.3057], Nzérékoré: [7.7561, -8.8178], Nzerekore: [7.7561, -8.8178], Siguiri: [11.4174, -9.1700],
 };
 const GUINEA_CENTER: [number, number] = [10.4, -11.0];
-const GPS_ACCURACY_THRESHOLD_M = 50; // au-delà : ajout bloqué
-const GPS_ACCURACY_WARN_M = 25; // au-delà : avertissement
 const severityColor: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e" };
 
 const MARKER_META: Record<string, { color: string; emoji: string; label: string; Icon: any }> = {
@@ -93,22 +92,8 @@ export default function MapView() {
   });
 
   // --- Position temps réel de l'utilisateur ---
-  const [myPos, setMyPos] = useState<[number, number] | null>(null);
-  const [myAccuracy, setMyAccuracy] = useState<number | null>(null);
   const [tracking, setTracking] = useState(false);
-
-  useEffect(() => {
-    if (!tracking || !navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        setMyPos([pos.coords.latitude, pos.coords.longitude]);
-        setMyAccuracy(pos.coords.accuracy);
-      },
-      (err) => toast.error("Géolocalisation: " + err.message),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
-  }, [tracking]);
+  const { pos: myPos, accuracy: myAccuracy } = useGeoWatch(tracking);
 
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
@@ -140,20 +125,11 @@ export default function MapView() {
     });
   }, [operators]);
 
-  function useMyLocation() {
-    if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const acc = pos.coords.accuracy;
-        setForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        setFormAccuracy(acc);
-        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
-        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
-        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
-      },
-      () => toast.error("Impossible de récupérer la position"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+  async function useMyLocation() {
+    const r = await getCurrentGeo();
+    if (!r) return;
+    setForm(f => ({ ...f, latitude: r.lat.toFixed(6), longitude: r.lng.toFixed(6) }));
+    setFormAccuracy(r.accuracy);
   }
 
   function startReport() {
@@ -269,20 +245,11 @@ export default function MapView() {
     setOpOpen(true);
   }
 
-  function useMyLocationOperator() {
-    if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const acc = pos.coords.accuracy;
-        setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        setOpFormAccuracy(acc);
-        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
-        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
-        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
-      },
-      () => toast.error("Impossible de récupérer la position"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+  async function useMyLocationOperator() {
+    const r = await getCurrentGeo();
+    if (!r) return;
+    setOpForm(f => ({ ...f, latitude: r.lat.toFixed(6), longitude: r.lng.toFixed(6) }));
+    setOpFormAccuracy(r.accuracy);
   }
 
   async function submitOperator() {
