@@ -54,7 +54,8 @@ export default function Reports() {
       </head><body><h1>${r.title}</h1><p><em>Généré le ${format(new Date(r.generated_at), "dd MMMM yyyy 'à' HH:mm", { locale: fr })}</em></p><pre>${r.content}</pre>
       <hr><p style="text-align:center;color:#888;font-size:11px">ARPT Guinée — CERT National · Document confidentiel</p></body></html>`;
     const w = window.open("", "_blank");
-    if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 300); }
+    if (!w) return toast.error("Pop-up bloquée — autorisez les fenêtres pour exporter");
+    w.document.write(html); w.document.close(); setTimeout(() => w.print(), 400);
   }
 
   async function exportIncidentsCsv() {
