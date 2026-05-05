@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Download, FileText } from "lucide-react";
 import { incidentStatusLabel, incidentTypeLabel, severityColor, severityLabel, IncidentStatus, IncidentType, Severity } from "@/lib/types";
+import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { incidentSchema, firstZodError } from "@/lib/validation";
