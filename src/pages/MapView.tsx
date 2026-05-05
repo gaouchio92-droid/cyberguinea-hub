@@ -92,22 +92,8 @@ export default function MapView() {
   });
 
   // --- Position temps réel de l'utilisateur ---
-  const [myPos, setMyPos] = useState<[number, number] | null>(null);
-  const [myAccuracy, setMyAccuracy] = useState<number | null>(null);
   const [tracking, setTracking] = useState(false);
-
-  useEffect(() => {
-    if (!tracking || !navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
-      (pos) => {
-        setMyPos([pos.coords.latitude, pos.coords.longitude]);
-        setMyAccuracy(pos.coords.accuracy);
-      },
-      (err) => toast.error("Géolocalisation: " + err.message),
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
-  }, [tracking]);
+  const { pos: myPos, accuracy: myAccuracy } = useGeoWatch(tracking);
 
   async function refresh() {
     const [{ data: o }, { data: i }, { data: f }, { data: m }] = await Promise.all([
