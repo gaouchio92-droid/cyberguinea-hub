@@ -41,17 +41,27 @@ export default function Incidents() {
   useEffect(() => { load(); }, []);
 
   async function create() {
-    if (!form.title.trim() || !user) return;
+    if (!user) return;
+    const parsed = incidentSchema.safeParse(form);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("incidents").insert({
-      title: form.title, description: form.description || null, type: form.type,
-      severity: form.severity, status: form.status, notes: form.notes || null,
-      operator_id: form.operator_id || null, created_by: user.id, owner_id: user.id,
+      title: v.title, description: v.description || null, type: v.type,
+      severity: v.severity, status: v.status, notes: v.notes || null,
+      operator_id: v.operator_id || null, created_by: user.id, owner_id: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Incident créé");
     setOpen(false);
     setForm({ title: "", description: "", type: "phishing", severity: "medium", status: "open", operator_id: "", notes: "" });
     load();
+  }
+
+  async function confirmCloseValidated() {
+    if (!closureComment.trim() || closureComment.trim().length < 5) {
+      return toast.error("Commentaire de clôture min. 5 caractères");
+    }
+    return confirmClose();
   }
 
   async function updateStatus(id: string, status: IncidentStatus, incident?: any) {
