@@ -58,6 +58,83 @@ export type Database = {
           },
         ]
       }
+      compliance_assessments: {
+        Row: {
+          assessed_at: string
+          assessed_by: string | null
+          evidence: string | null
+          id: string
+          operator_id: string
+          remediation_due: string | null
+          requirement_id: string
+          status: Database["public"]["Enums"]["compliance_status"]
+          updated_at: string
+        }
+        Insert: {
+          assessed_at?: string
+          assessed_by?: string | null
+          evidence?: string | null
+          id?: string
+          operator_id: string
+          remediation_due?: string | null
+          requirement_id: string
+          status?: Database["public"]["Enums"]["compliance_status"]
+          updated_at?: string
+        }
+        Update: {
+          assessed_at?: string
+          assessed_by?: string | null
+          evidence?: string | null
+          id?: string
+          operator_id?: string
+          remediation_due?: string | null
+          requirement_id?: string
+          status?: Database["public"]["Enums"]["compliance_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "compliance_assessments_requirement_id_fkey"
+            columns: ["requirement_id"]
+            isOneToOne: false
+            referencedRelation: "compliance_requirements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      compliance_requirements: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string
+          description: string | null
+          framework: Database["public"]["Enums"]["compliance_framework"]
+          id: string
+          title: string
+          weight: number
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          framework: Database["public"]["Enums"]["compliance_framework"]
+          id?: string
+          title: string
+          weight?: number
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          framework?: Database["public"]["Enums"]["compliance_framework"]
+          id?: string
+          title?: string
+          weight?: number
+        }
+        Relationships: []
+      }
       fiber_links: {
         Row: {
           color: string | null
@@ -561,6 +638,12 @@ export type Database = {
     Enums: {
       app_role: "admin" | "analyst" | "operator"
       audit_framework: "ISO27001" | "NIST" | "ARPT" | "PCI_DSS"
+      compliance_framework: "ANSSI" | "NIS2" | "ISO27001" | "PCIDSS"
+      compliance_status:
+        | "compliant"
+        | "partial"
+        | "non_compliant"
+        | "not_applicable"
       incident_status:
         | "open"
         | "investigating"
@@ -729,6 +812,13 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "analyst", "operator"],
       audit_framework: ["ISO27001", "NIST", "ARPT", "PCI_DSS"],
+      compliance_framework: ["ANSSI", "NIS2", "ISO27001", "PCIDSS"],
+      compliance_status: [
+        "compliant",
+        "partial",
+        "non_compliant",
+        "not_applicable",
+      ],
       incident_status: [
         "open",
         "investigating",
