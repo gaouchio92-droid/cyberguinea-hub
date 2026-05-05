@@ -228,57 +228,281 @@ function StackTab() {
   );
 }
 
-const GUIDES = [
+type Guide = {
+  title: string;
+  intro: string;
+  roles?: string[];
+  steps?: string[];
+  tips?: string[];
+};
+
+const GUIDES: Guide[] = [
   {
-    title: "Tableau de bord",
-    body: "Vue synthétique : KPIs incidents en cours, sévérités, dernières alertes Threat Intel. Mis à jour en temps réel.",
+    title: "🔐 Connexion & gestion du compte",
+    intro: "Toute action est tracée et liée à votre identité. Utilisez l'email professionnel fourni par l'ARPT.",
+    roles: ["Tous"],
+    steps: [
+      "Rendez-vous sur la page de connexion et saisissez vos identifiants.",
+      "Si c'est votre première connexion, cliquez sur « Mot de passe oublié » pour définir votre mot de passe.",
+      "Une fois connecté, votre rôle (admin / analyste / opérateur) détermine les modules accessibles.",
+      "Mettez à jour votre profil (nom, photo) depuis le menu utilisateur en haut à droite.",
+    ],
+    tips: [
+      "Déconnectez-vous systématiquement en fin de journée.",
+      "Ne partagez jamais vos identifiants — chaque action est journalisée dans Logs Système.",
+    ],
   },
   {
-    title: "Planning & Tâches",
-    body: "Suivi des tâches personnelles et collectives. Statuts : à faire, en cours, terminé. Priorités : basse → urgente.",
+    title: "📊 Tableau de bord exécutif",
+    intro: "Vue 360° de la cybersécurité nationale : KPIs, tendances 14 jours, heatmap, top opérateurs à risque.",
+    roles: ["Tous"],
+    steps: [
+      "Les 5 KPIs en haut sont cliquables et renvoient vers le module détaillé correspondant.",
+      "La courbe « Tendance » montre incidents ouverts vs résolus jour par jour.",
+      "La heatmap (jour × heure) identifie les créneaux à risque pour adapter les astreintes.",
+      "« Threat Intel récent » liste les 5 dernières alertes — cliquez pour voir le détail.",
+    ],
+    tips: [
+      "Le compteur « Incidents ouverts » reflète l'état réel temps réel de la base.",
+      "La conformité moyenne est calculée à partir des évaluations ANSSI/NIS2 du module Conformité.",
+    ],
   },
   {
-    title: "Incidents",
-    body: "Cycle de vie complet : Ouvert → Investigation → Contenu → Résolu → Clôturé. La clôture exige un commentaire obligatoire (admin/analyste). Les opérateurs sont en lecture seule après création.",
+    title: "📅 Planning & Tâches",
+    intro: "Suivi personnel des tâches opérationnelles avec priorités, échéances et catégories.",
+    roles: ["Tous"],
+    steps: [
+      "Cliquez « Nouvelle tâche » pour créer une tâche (titre, description, priorité, échéance, catégorie).",
+      "Faites évoluer le statut : À faire → En cours → Terminé.",
+      "Filtrez par priorité ou statut pour vous concentrer sur l'urgent.",
+      "Les tâches sont privées — seul vous voyez vos tâches.",
+    ],
+    tips: [
+      "Une notification temps réel est envoyée si un admin vous assigne une tâche.",
+      "Utilisez les catégories (Audit, Veille, Réponse, Reporting…) pour structurer votre semaine.",
+    ],
   },
   {
-    title: "Threat Intelligence",
-    body: "Catalogue de CVE, APT, campagnes de ransomware/phishing. Filtrage par sévérité, catégorie, région.",
+    title: "🚨 Incidents — Cycle de vie complet",
+    intro: "Gestion de l'intégralité du processus de réponse à incident, du signalement à la clôture documentée.",
+    roles: ["Opérateur (création)", "Analyste / Admin (gestion complète)"],
+    steps: [
+      "Créer : « Nouvel incident » → renseigner titre, type (malware, phishing, DDoS…), sévérité, opérateur impacté.",
+      "Assigner : ouvrez l'incident, choisissez un assigné et une priorité (Urgente 4h / Haute 12h / Moyenne 48h / Basse 7j) — la SLA est calculée automatiquement.",
+      "Investiguer : passez le statut à « Investigation », puis « Contenu » lorsque la menace est isolée.",
+      "Commenter : utilisez le fil de commentaires pour tracer chaque action — ajoutez l'URL d'une pièce jointe si besoin.",
+      "Résoudre puis Clôturer : la clôture exige un commentaire de clôture obligatoire (RETEX).",
+    ],
+    tips: [
+      "Les opérateurs ne peuvent que créer/voir leurs incidents — la modification est réservée aux analystes/admins.",
+      "Une notification temps réel est diffusée à toute la cellule à chaque nouvel incident ou changement de statut.",
+      "L'échéance SLA passe en rouge dans la liste si elle est dépassée.",
+    ],
   },
   {
-    title: "Opérateurs & Audits",
-    body: "Fiche par opérateur télécom. URL source configurable + bouton 'Synchroniser' qui scrape et résume via IA pour pré-remplir les informations.",
+    title: "🛰️ Threat Intelligence",
+    intro: "Veille consolidée : CVE, APT, campagnes ransomware/phishing, alertes régionales.",
+    roles: ["Tous (lecture)", "Analyste / Admin (création)"],
+    steps: [
+      "Filtrez par sévérité, catégorie ou région pour cibler ce qui concerne la Guinée.",
+      "Cliquez « Sync CVE » pour ingérer les dernières vulnérabilités publiées par le NVD.",
+      "Ajoutez manuellement une fiche pour les menaces locales non publiées par le NVD.",
+      "Chaque fiche contient des recommandations actionnables pour les opérateurs.",
+    ],
+    tips: [
+      "Une synchronisation automatique des CVE tourne tous les jours à 06:00 UTC.",
+      "Référencez systématiquement le CVE-ID dans les incidents liés.",
+    ],
   },
   {
-    title: "Centre de Reporting",
-    body: "Génération de rapports PDF/CSV pour la direction et l'autorité.",
+    title: "🏢 Opérateurs & Audits",
+    intro: "Annuaire des opérateurs télécom régulés et historique des audits de conformité.",
+    roles: ["Tous (lecture)", "Analyste / Admin (édition)"],
+    steps: [
+      "Ajoutez un opérateur avec nom, type (FAI, MNO, hébergeur…), région et coordonnées.",
+      "Renseignez l'URL source officielle puis cliquez « Synchroniser » : l'IA récupère et résume les infos publiques.",
+      "Créez un audit (référentiel ANSSI/NIS2/ISO/PCI), notez le score, les constats et le plan de remédiation.",
+      "Le score de conformité affiché est mis à jour depuis le module Conformité.",
+    ],
+    tips: [
+      "Renseignez la latitude/longitude pour faire apparaître l'opérateur sur la cartographie.",
+      "Un opérateur sous 50% apparaît en zone rouge dans le rapport DG.",
+    ],
   },
   {
-    title: "Assistant IA",
-    body: "Chat avec un modèle Gemini pour analyse rapide, rédaction de communiqués, classification d'incidents.",
+    title: "✅ Conformité ANSSI / NIS2 / ISO / PCI",
+    intro: "Évaluation détaillée des exigences réglementaires par opérateur, avec scoring pondéré et suivi de remédiation.",
+    roles: ["Analyste / Admin"],
+    steps: [
+      "Sélectionnez l'opérateur puis l'onglet du référentiel (ANSSI, NIS2, ISO27001, PCIDSS).",
+      "Pour chaque exigence, cliquez l'icône crayon → choisissez le statut : Conforme / Partiel / Non conforme / N/A.",
+      "Renseignez les preuves (politique, capture, rapport) et l'échéance de remédiation si non conforme.",
+      "Le score (0-100) est recalculé automatiquement et propagé sur la fiche opérateur.",
+      "Cliquez « Exporter CSV » pour transmettre l'évaluation à l'opérateur ou à la DG.",
+    ],
+    tips: [
+      "Les exigences pondérées (poids 1-3) reflètent leur criticité.",
+      "Les statuts « N/A » sont exclus du calcul de score.",
+    ],
   },
   {
-    title: "Utilisateurs (admin)",
-    body: "Création de comptes : admin, analyste, opérateur. Les rôles sont stockés dans une table dédiée pour prévenir l'élévation de privilège.",
+    title: "🗺️ Cartographie nationale",
+    intro: "Vue géographique des opérateurs, incidents et liens fibre — utile en cellule de crise.",
+    roles: ["Tous (lecture)", "Analyste / Admin (création de marqueurs et liens)"],
+    steps: [
+      "Activez/désactivez les couches : opérateurs, incidents, liens fibre.",
+      "Cliquez sur un point pour voir le détail (incident, opérateur).",
+      "Ajoutez un marqueur d'événement (panne, intervention) en cliquant sur la carte.",
+      "Tracez un lien fibre en saisissant les coordonnées et un nom descriptif.",
+    ],
+    tips: [
+      "La carte se centre automatiquement sur la Guinée.",
+      "Les incidents ouverts apparaissent en rouge, résolus en gris.",
+    ],
+  },
+  {
+    title: "🎯 Exercices & PCA",
+    intro: "Planification d'exercices de crise (table-top, red team, PCA) et capitalisation des retours d'expérience.",
+    roles: ["Analyste / Admin"],
+    steps: [
+      "Créez un exercice : titre, type, scénario, objectifs, date.",
+      "Ajoutez les participants et leur rôle (animateur, observateur, joueur).",
+      "À l'issue, passez le statut à « Terminé », notez le score (0-100) et rédigez le RETEX (lessons learned).",
+      "Consultez l'historique pour mesurer la progression de la maturité.",
+    ],
+    tips: [
+      "Un exercice annuel minimum est recommandé par l'ANSSI pour chaque OIV.",
+      "Documentez systématiquement le RETEX — c'est la valeur principale de l'exercice.",
+    ],
+  },
+  {
+    title: "📈 Centre de Reporting",
+    intro: "Génération automatisée de rapports pour la Direction Générale et l'autorité de tutelle.",
+    roles: ["Analyste / Admin"],
+    steps: [
+      "Cliquez « Générer un rapport » → choisissez Hebdomadaire, Mensuel, Incident ou Audit.",
+      "Le système agrège incidents, KPIs et top opérateurs à risque sur la période.",
+      "Téléchargez en PDF (impression depuis le navigateur) ou exportez les incidents bruts en CSV.",
+      "Les rapports historiques restent consultables et réimprimables.",
+    ],
+    tips: [
+      "Si l'export PDF ne s'ouvre pas, autorisez les pop-ups pour cette page dans votre navigateur.",
+      "Le CSV est compatible Excel (BOM UTF-8 inclus pour les accents).",
+    ],
+  },
+  {
+    title: "🤖 Assistant IA",
+    intro: "Copilote conversationnel basé sur Gemini : analyse rapide, rédaction, classification.",
+    roles: ["Tous"],
+    steps: [
+      "Posez une question en langage naturel (français).",
+      "Demandez par exemple : « Rédige un communiqué pour une fuite de données opérateur X ».",
+      "Demandez la classification d'un IoC, l'explication d'un CVE, ou un plan de réponse.",
+    ],
+    tips: [
+      "L'IA n'a pas accès aux données sensibles — n'y collez jamais d'identifiants ou de données nominatives.",
+      "Vérifiez toujours les sorties IA avant diffusion officielle.",
+    ],
+  },
+  {
+    title: "🔔 Notifications temps réel",
+    intro: "Cloche en haut à droite : alertes instantanées sur incidents et tâches.",
+    roles: ["Tous"],
+    steps: [
+      "Un toast apparaît à chaque nouvel incident, changement de statut, ou nouvelle tâche assignée.",
+      "Cliquez la cloche pour voir l'historique des 30 dernières notifications.",
+      "Cliquez une notification pour ouvrir la ressource concernée.",
+      "Bouton « Vider » pour réinitialiser la liste.",
+    ],
+    tips: [
+      "Les notifications restent en mémoire entre les sessions (stockage local du navigateur).",
+      "Le badge rouge indique le nombre de notifications non lues depuis votre dernière ouverture.",
+    ],
+  },
+  {
+    title: "👥 Utilisateurs & rôles (admin)",
+    intro: "Création et gestion des comptes. Trois rôles définissent les permissions.",
+    roles: ["Admin uniquement"],
+    steps: [
+      "Module « Utilisateurs » → « Nouvel utilisateur » : email, nom complet, rôle.",
+      "Choisissez le rôle : Admin (tout), Analyste (gestion opérationnelle), Opérateur (lecture + création d'incidents propres).",
+      "L'utilisateur reçoit un email d'invitation pour définir son mot de passe.",
+      "Modifiez le rôle ou désactivez le compte à tout moment.",
+    ],
+    tips: [
+      "Les rôles sont stockés dans une table dédiée pour bloquer toute élévation de privilège.",
+      "Limitez le nombre d'admins au strict minimum (principe du moindre privilège).",
+    ],
+  },
+  {
+    title: "📜 Logs Système (admin)",
+    intro: "Journal d'audit immuable de toutes les actions sensibles.",
+    roles: ["Admin uniquement"],
+    steps: [
+      "Consultez l'horodatage, l'acteur, l'action et la cible.",
+      "Filtrez par niveau (info, warning, error) ou recherchez par email/action.",
+      "Les suppressions sont automatiquement marquées en « warning ».",
+    ],
+    tips: [
+      "Les logs ne peuvent ni être modifiés ni supprimés (conformité audit).",
+      "À conserver minimum 1 an pour traçabilité réglementaire.",
+    ],
   },
 ];
 
 function GuidesTab() {
+  const [q, setQ] = useState("");
+  const filtered = GUIDES.filter((g) => {
+    const n = q.toLowerCase().trim();
+    if (!n) return true;
+    return g.title.toLowerCase().includes(n) || g.intro.toLowerCase().includes(n)
+      || (g.steps ?? []).some(s => s.toLowerCase().includes(n))
+      || (g.tips ?? []).some(s => s.toLowerCase().includes(n));
+  });
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> Manuel d'utilisation</CardTitle>
-        <CardDescription>Comment utiliser chaque module de la plateforme.</CardDescription>
+        <CardTitle className="text-base flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> Manuel d'utilisation détaillé</CardTitle>
+        <CardDescription>Guide pas à pas pour chaque module — rôles, étapes, bonnes pratiques.</CardDescription>
+        <div className="relative mt-3">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher dans le guide (incident, conformité, SLA…)" className="pl-9" />
+        </div>
       </CardHeader>
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
-          {GUIDES.map((g) => (
+          {filtered.map((g) => (
             <AccordionItem key={g.title} value={g.title}>
               <AccordionTrigger className="text-left font-medium">{g.title}</AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground">{g.body}</AccordionContent>
+              <AccordionContent className="space-y-4 text-sm">
+                <p className="text-muted-foreground">{g.intro}</p>
+                {g.roles && (
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-xs font-semibold text-muted-foreground mr-1">Rôles :</span>
+                    {g.roles.map(r => <Badge key={r} variant="secondary" className="text-[10px]">{r}</Badge>)}
+                  </div>
+                )}
+                {g.steps && (
+                  <div>
+                    <div className="text-xs font-semibold mb-2 text-foreground">Marche à suivre</div>
+                    <ol className="list-decimal pl-5 space-y-1.5 text-muted-foreground">
+                      {g.steps.map((s, i) => <li key={i}>{s}</li>)}
+                    </ol>
+                  </div>
+                )}
+                {g.tips && (
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <div className="text-xs font-semibold mb-1.5 text-primary">💡 Bonnes pratiques</div>
+                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground text-xs">
+                      {g.tips.map((t, i) => <li key={i}>{t}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
+        {filtered.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">Aucun résultat — essayez un autre mot-clé.</p>}
       </CardContent>
     </Card>
   );
