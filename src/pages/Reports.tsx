@@ -97,6 +97,7 @@ export default function Reports() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         }
       />
 
