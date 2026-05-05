@@ -46,9 +46,15 @@ export default function Incidents() {
     if (!parsed.success) return toast.error(firstZodError(parsed.error));
     const v = parsed.data;
     const { error } = await supabase.from("incidents").insert({
-      title: v.title, description: v.description || null, type: v.type,
-      severity: v.severity, status: v.status, notes: v.notes || null,
-      operator_id: v.operator_id || null, created_by: user.id, owner_id: user.id,
+      title: v.title,
+      description: v.description || null,
+      type: v.type as IncidentType,
+      severity: v.severity as Severity,
+      status: v.status as IncidentStatus,
+      notes: v.notes || null,
+      operator_id: v.operator_id || null,
+      created_by: user.id,
+      owner_id: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Incident créé");
