@@ -31,6 +31,7 @@ const baseItems = [
 ];
 const adminItems = [
   { title: "Maturité CSIRT", url: "/maturity", icon: Award },
+  { title: "Architecture & Code", url: "/architecture", icon: Code2 },
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Journal système", url: "/system-logs", icon: ScrollText },
 ];
