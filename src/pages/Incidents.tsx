@@ -15,6 +15,7 @@ import { Plus, Download, FileText } from "lucide-react";
 import { incidentStatusLabel, incidentTypeLabel, severityColor, severityLabel, IncidentStatus, IncidentType, Severity } from "@/lib/types";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { incidentSchema, firstZodError } from "@/lib/validation";
 
 export default function Incidents() {
   const { user, isAdmin, isAnalyst } = useAuth();
