@@ -80,6 +80,12 @@ export default function Intel() {
                     </Select>
                   </div>
                 </div>
+                <div><Label>Classification TLP</Label>
+                  <Select value={form.tlp} onValueChange={(v: TLP) => setForm({ ...form, tlp: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{TLP_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label} — {o.desc}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
                 <div><Label>CVE ID (si applicable)</Label><Input value={form.cve_id} onChange={e => setForm({ ...form, cve_id: e.target.value })} /></div>
                 <div><Label>Région d'impact</Label><Input value={form.region_impact} onChange={e => setForm({ ...form, region_impact: e.target.value })} /></div>
                 <div><Label>Source</Label><Input value={form.source} onChange={e => setForm({ ...form, source: e.target.value })} /></div>
