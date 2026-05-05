@@ -245,20 +245,11 @@ export default function MapView() {
     setOpOpen(true);
   }
 
-  function useMyLocationOperator() {
-    if (!navigator.geolocation) return toast.error("Géolocalisation indisponible");
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const acc = pos.coords.accuracy;
-        setOpForm(f => ({ ...f, latitude: pos.coords.latitude.toFixed(6), longitude: pos.coords.longitude.toFixed(6) }));
-        setOpFormAccuracy(acc);
-        if (acc > GPS_ACCURACY_THRESHOLD_M) toast.error(`Précision GPS insuffisante (±${Math.round(acc)} m). Seuil : ${GPS_ACCURACY_THRESHOLD_M} m.`);
-        else if (acc > GPS_ACCURACY_WARN_M) toast.warning(`Précision GPS faible : ±${Math.round(acc)} m`);
-        else toast.success(`Position GPS récupérée (±${Math.round(acc)} m)`);
-      },
-      () => toast.error("Impossible de récupérer la position"),
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
+  async function useMyLocationOperator() {
+    const r = await getCurrentGeo();
+    if (!r) return;
+    setOpForm(f => ({ ...f, latitude: r.lat.toFixed(6), longitude: r.lng.toFixed(6) }));
+    setOpFormAccuracy(r.accuracy);
   }
 
   async function submitOperator() {
