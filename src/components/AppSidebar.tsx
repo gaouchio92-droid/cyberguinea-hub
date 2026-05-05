@@ -13,27 +13,59 @@ import { Button } from "@/components/ui/button";
 import MapView from "@/pages/MapView";
 import arptLogo from "@/assets/arpt-logo.png";
 
-const baseItems = [
-  { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
-  { title: "Planning & Tâches", url: "/tasks", icon: ListChecks },
-  { title: "Incidents", url: "/incidents", icon: ShieldAlert },
-  { title: "Opérations", url: "/operations", icon: Activity },
-  { title: "Threat Intelligence", url: "/intel", icon: Radar },
-  { title: "Opérateurs & Audits", url: "/operators", icon: Building2 },
-  { title: "Conformité ANSSI/NIS2", url: "/compliance", icon: ShieldCheck },
-  { title: "Exercices & PCA", url: "/exercises", icon: Target },
-  { title: "Cartographie", url: "/map", icon: Map },
-  { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
-  { title: "Bulletins & Avis", url: "/bulletins", icon: FileText },
-  { title: "Indicateurs (IoCs)", url: "/iocs", icon: Crosshair },
-  { title: "Assistant IA", url: "/assistant", icon: Sparkles },
-  { title: "Documentation", url: "/documentation", icon: BookOpen },
-];
-const adminItems = [
-  { title: "Maturité CSIRT", url: "/maturity", icon: Award },
-  { title: "Architecture & Code", url: "/architecture", icon: Code2 },
-  { title: "Utilisateurs", url: "/users", icon: Users },
-  { title: "Journal système", url: "/system-logs", icon: ScrollText },
+type NavItem = { title: string; url: string; icon: any };
+type NavGroup = { label: string; items: NavItem[]; adminOnly?: boolean };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: "Pilotage",
+    items: [
+      { title: "Tableau de bord", url: "/", icon: LayoutDashboard },
+      { title: "Planning & Tâches", url: "/tasks", icon: ListChecks },
+      { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
+    ],
+  },
+  {
+    label: "Opérations cyber",
+    items: [
+      { title: "Incidents", url: "/incidents", icon: ShieldAlert },
+      { title: "Opérations", url: "/operations", icon: Activity },
+      { title: "Exercices & PCA", url: "/exercises", icon: Target },
+    ],
+  },
+  {
+    label: "Renseignement",
+    items: [
+      { title: "Threat Intelligence", url: "/intel", icon: Radar },
+      { title: "Indicateurs (IoCs)", url: "/iocs", icon: Crosshair },
+      { title: "Bulletins & Avis", url: "/bulletins", icon: FileText },
+    ],
+  },
+  {
+    label: "Écosystème",
+    items: [
+      { title: "Opérateurs & Audits", url: "/operators", icon: Building2 },
+      { title: "Conformité ANSSI/NIS2", url: "/compliance", icon: ShieldCheck },
+      { title: "Cartographie", url: "/map", icon: Map },
+    ],
+  },
+  {
+    label: "Outils",
+    items: [
+      { title: "Assistant IA", url: "/assistant", icon: Sparkles },
+      { title: "Documentation", url: "/documentation", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Administration",
+    adminOnly: true,
+    items: [
+      { title: "Maturité CSIRT", url: "/maturity", icon: Award },
+      { title: "Architecture & Code", url: "/architecture", icon: Code2 },
+      { title: "Utilisateurs", url: "/users", icon: Users },
+      { title: "Journal système", url: "/system-logs", icon: ScrollText },
+    ],
+  },
 ];
 
 export function AppSidebar() {
@@ -41,7 +73,7 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const { signOut, user, isAdmin } = useAuth();
-  const items = isAdmin ? [...baseItems, ...adminItems] : baseItems;
+  const groups = NAV_GROUPS.filter(g => !g.adminOnly || isAdmin);
   const [mapOpen, setMapOpen] = useState(false);
 
   return (
@@ -61,38 +93,40 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          {!collapsed && <SidebarGroupLabel>Navigation</SidebarGroupLabel>}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map(item => {
-                const active = pathname === item.url;
-                const isMap = item.url === "/map";
-                return (
-                  <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={active && !isMap}>
-                      {isMap ? (
-                        <button
-                          type="button"
-                          onClick={() => setMapOpen(true)}
-                          className="flex items-center gap-3 w-full text-left"
-                        >
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && <span>{item.title}</span>}
-                        </button>
-                      ) : (
-                        <NavLink to={item.url} className="flex items-center gap-3">
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && <span>{item.title}</span>}
-                        </NavLink>
-                      )}
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map(group => (
+          <SidebarGroup key={group.label}>
+            {!collapsed && <SidebarGroupLabel>{group.label}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map(item => {
+                  const active = pathname === item.url;
+                  const isMap = item.url === "/map";
+                  return (
+                    <SidebarMenuItem key={item.url}>
+                      <SidebarMenuButton asChild isActive={active && !isMap} tooltip={item.title}>
+                        {isMap ? (
+                          <button
+                            type="button"
+                            onClick={() => setMapOpen(true)}
+                            className="flex items-center gap-3 w-full text-left"
+                          >
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            {!collapsed && <span>{item.title}</span>}
+                          </button>
+                        ) : (
+                          <NavLink to={item.url} className="flex items-center gap-3">
+                            <item.icon className="h-4 w-4 shrink-0" />
+                            {!collapsed && <span>{item.title}</span>}
+                          </NavLink>
+                        )}
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         {!collapsed && user && (
