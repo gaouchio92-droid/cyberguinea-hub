@@ -27,6 +27,7 @@ export default function Operators() {
   const [urlInput, setUrlInput] = useState("");
   const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
+  const [contactsOp, setContactsOp] = useState<{ id: string; name: string } | null>(null);
 
   async function load() {
     const [{ data: o }, { data: a }] = await Promise.all([
