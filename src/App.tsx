@@ -32,6 +32,7 @@ const Iocs = lazy(() => import("./pages/Iocs"));
 const Bulletins = lazy(() => import("./pages/Bulletins"));
 const Maturity = lazy(() => import("./pages/Maturity"));
 const PublicAvis = lazy(() => import("./pages/PublicAvis"));
+const Architecture = lazy(() => import("./pages/Architecture"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -85,6 +86,7 @@ const App = () => (
                 <Route path="/users" element={<Users />} />
                 <Route path="/compliance" element={<Compliance />} />
                 <Route path="/exercises" element={<Exercises />} />
+                <Route path="/architecture" element={<Architecture />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
