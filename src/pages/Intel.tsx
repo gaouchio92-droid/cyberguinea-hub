@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Radar, ShieldAlert, Bug, Globe, RefreshCw } from "lucide-react";
 import { severityColor, severityLabel, Severity } from "@/lib/types";
+import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
