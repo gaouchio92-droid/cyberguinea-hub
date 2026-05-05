@@ -57,6 +57,20 @@ export default function Reports() {
     if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 300); }
   }
 
+  async function exportIncidentsCsv() {
+    const { data } = await supabase.from("incidents").select("*").order("created_at", { ascending: false });
+    const rows = [["ID","Titre","Type","Sévérité","Statut","Détecté","Résolu","Description"]];
+    (data ?? []).forEach((i: any) => {
+      rows.push([i.id, i.title, i.type, i.severity, i.status, i.detected_at ?? "", i.resolved_at ?? "", (i.description ?? "").replace(/\n/g, " ")]);
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `incidents-${format(new Date(),"yyyyMMdd")}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export CSV téléchargé");
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
