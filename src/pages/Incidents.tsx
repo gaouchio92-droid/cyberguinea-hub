@@ -55,13 +55,14 @@ export default function Incidents() {
       status: v.status as IncidentStatus,
       notes: v.notes || null,
       operator_id: v.operator_id || null,
+      tlp: form.tlp,
       created_by: user.id,
       owner_id: user.id,
     });
     if (error) return toast.error(error.message);
     toast.success("Incident créé");
     setOpen(false);
-    setForm({ title: "", description: "", type: "phishing", severity: "medium", status: "open", operator_id: "", notes: "" });
+    setForm({ title: "", description: "", type: "phishing", severity: "medium", status: "open", operator_id: "", notes: "", tlp: "amber" });
     load();
   }
 
