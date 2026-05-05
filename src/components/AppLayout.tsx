@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import NotificationsBell from "./NotificationsBell";
 
 export default function AppLayout() {
   const { user, loading } = useAuth();
@@ -24,6 +25,7 @@ export default function AppLayout() {
                 <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Système opérationnel
               </div>
+              <NotificationsBell />
             </div>
           </header>
           <main className="flex-1 p-6 overflow-x-hidden">
