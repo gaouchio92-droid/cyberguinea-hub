@@ -135,6 +135,89 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_participants: {
+        Row: {
+          attended: boolean | null
+          exercise_id: string
+          id: string
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          attended?: boolean | null
+          exercise_id: string
+          id?: string
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          attended?: boolean | null
+          exercise_id?: string
+          id?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_participants_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          duration_minutes: number | null
+          id: string
+          kind: Database["public"]["Enums"]["exercise_kind"]
+          lessons_learned: string | null
+          objectives: string | null
+          operator_id: string | null
+          scenario: string | null
+          scheduled_at: string
+          score: number | null
+          status: Database["public"]["Enums"]["exercise_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["exercise_kind"]
+          lessons_learned?: string | null
+          objectives?: string | null
+          operator_id?: string | null
+          scenario?: string | null
+          scheduled_at?: string
+          score?: number | null
+          status?: Database["public"]["Enums"]["exercise_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          id?: string
+          kind?: Database["public"]["Enums"]["exercise_kind"]
+          lessons_learned?: string | null
+          objectives?: string | null
+          operator_id?: string | null
+          scenario?: string | null
+          scheduled_at?: string
+          score?: number | null
+          status?: Database["public"]["Enums"]["exercise_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       fiber_links: {
         Row: {
           color: string | null
@@ -174,8 +257,44 @@ export type Database = {
         }
         Relationships: []
       }
+      incident_comments: {
+        Row: {
+          attachment_url: string | null
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          incident_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          incident_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          incident_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_comments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       incidents: {
         Row: {
+          assignee_id: string | null
           closed_at: string | null
           closed_by: string | null
           closure_comment: string | null
@@ -187,8 +306,10 @@ export type Database = {
           notes: string | null
           operator_id: string | null
           owner_id: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
           resolved_at: string | null
           severity: Database["public"]["Enums"]["severity"]
+          sla_due_at: string | null
           status: Database["public"]["Enums"]["incident_status"]
           timeline: Json | null
           title: string
@@ -196,6 +317,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assignee_id?: string | null
           closed_at?: string | null
           closed_by?: string | null
           closure_comment?: string | null
@@ -207,8 +329,10 @@ export type Database = {
           notes?: string | null
           operator_id?: string | null
           owner_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
           resolved_at?: string | null
           severity?: Database["public"]["Enums"]["severity"]
+          sla_due_at?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           timeline?: Json | null
           title: string
@@ -216,6 +340,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assignee_id?: string | null
           closed_at?: string | null
           closed_by?: string | null
           closure_comment?: string | null
@@ -227,8 +352,10 @@ export type Database = {
           notes?: string | null
           operator_id?: string | null
           owner_id?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
           resolved_at?: string | null
           severity?: Database["public"]["Enums"]["severity"]
+          sla_due_at?: string | null
           status?: Database["public"]["Enums"]["incident_status"]
           timeline?: Json | null
           title?: string
@@ -644,6 +771,13 @@ export type Database = {
         | "partial"
         | "non_compliant"
         | "not_applicable"
+      exercise_kind:
+        | "tabletop"
+        | "simulation"
+        | "pra_test"
+        | "phishing_drill"
+        | "red_team"
+      exercise_status: "planned" | "running" | "completed" | "cancelled"
       incident_status:
         | "open"
         | "investigating"
@@ -819,6 +953,14 @@ export const Constants = {
         "non_compliant",
         "not_applicable",
       ],
+      exercise_kind: [
+        "tabletop",
+        "simulation",
+        "pra_test",
+        "phishing_drill",
+        "red_team",
+      ],
+      exercise_status: ["planned", "running", "completed", "cancelled"],
       incident_status: [
         "open",
         "investigating",

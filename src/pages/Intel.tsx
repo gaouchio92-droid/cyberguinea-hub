@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Radar, ShieldAlert, Bug, Globe } from "lucide-react";
+import { Plus, Radar, ShieldAlert, Bug, Globe, RefreshCw } from "lucide-react";
 import { severityColor, severityLabel, Severity } from "@/lib/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -50,6 +50,15 @@ export default function Intel() {
         title="Threat Intelligence"
         description="CVEs, APTs, ransomware et menaces ciblant l'Afrique de l'Ouest"
         action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={async () => {
+              const t = toast.loading("Synchronisation NVD…");
+              const { data, error } = await supabase.functions.invoke("cve-feed");
+              toast.dismiss(t);
+              if (error) return toast.error(error.message);
+              toast.success(`CVEs : ${data?.inserted ?? 0} nouveaux, ${data?.skipped ?? 0} déjà connus`);
+              load();
+            }}><RefreshCw className="h-4 w-4 mr-2" />Sync CVE</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Ajouter</Button></DialogTrigger>
             <DialogContent className="max-w-lg">
@@ -79,6 +88,7 @@ export default function Intel() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         }
       />
 
