@@ -24,6 +24,8 @@ const baseItems = [
   { title: "Exercices & PCA", url: "/exercises", icon: Target },
   { title: "Cartographie", url: "/map", icon: Map },
   { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
+  { title: "Bulletins & Avis", url: "/bulletins", icon: FileText },
+  { title: "Indicateurs (IoCs)", url: "/iocs", icon: Crosshair },
   { title: "Assistant IA", url: "/assistant", icon: Sparkles },
   { title: "Documentation", url: "/documentation", icon: BookOpen },
 ];
