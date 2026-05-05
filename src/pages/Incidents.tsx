@@ -30,6 +30,7 @@ export default function Incidents() {
   const [form, setForm] = useState({
     title: "", description: "", type: "phishing" as IncidentType,
     severity: "medium" as Severity, status: "open" as IncidentStatus, operator_id: "", notes: "",
+    tlp: "amber" as TLP,
   });
 
   async function load() {
