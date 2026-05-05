@@ -30,7 +30,7 @@ export default function AuthPage() {
     const parsed = signInSchema.safeParse({ email, password });
     if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
+    const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Connexion réussie");
