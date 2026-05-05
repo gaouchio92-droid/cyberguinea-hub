@@ -75,7 +75,13 @@ export default function Dashboard() {
     if (kpis && kpis.length) setKpi((k: any) => ({ ...(k ?? kpis[0]), operator_compliance_avg: avg }));
   })(); }, []);
 
-  const open = recent.filter(i => i.status !== "resolved" && i.status !== "closed").length;
+  const [openCount, setOpenCount] = useState(0);
+  useEffect(() => {
+    supabase.from("incidents").select("id", { count: "exact", head: true })
+      .not("status", "in", "(resolved,closed)")
+      .then(({ count }) => setOpenCount(count ?? 0));
+  }, []);
+  const open = openCount;
 
   return (
     <div className="space-y-6">

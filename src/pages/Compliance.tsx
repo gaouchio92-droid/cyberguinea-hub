@@ -120,7 +120,7 @@ export default function Compliance() {
       const a = opAssess.get(r.id);
       rows.push([r.framework, r.code, r.title, r.category ?? "", a ? STATUS_LABEL[a.status] : "Non évalué", a?.evidence ?? "", a?.remediation_due ?? ""]);
     });
-    const csv = rows.map(r => r.map(c => `"${(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
