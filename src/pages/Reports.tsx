@@ -77,8 +77,10 @@ export default function Reports() {
         title="Centre de Reporting"
         description="Rapports DG hebdomadaires, mensuels et exports d'incidents"
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Sparkles className="h-4 w-4 mr-2" />Générer un rapport</Button></DialogTrigger>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportIncidentsCsv}><Download className="h-4 w-4 mr-2" />Export CSV incidents</Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button><Sparkles className="h-4 w-4 mr-2" />Générer un rapport</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Nouveau rapport</DialogTitle></DialogHeader>
               <div className="space-y-3">
