@@ -30,6 +30,7 @@ const baseItems = [
   { title: "Documentation", url: "/documentation", icon: BookOpen },
 ];
 const adminItems = [
+  { title: "Maturité CSIRT", url: "/maturity", icon: Award },
   { title: "Utilisateurs", url: "/users", icon: Users },
   { title: "Journal système", url: "/system-logs", icon: ScrollText },
 ];
