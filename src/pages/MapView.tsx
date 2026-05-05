@@ -32,8 +32,6 @@ const REGION_COORDS: Record<string, [number, number]> = {
   Kankan: [10.3856, -9.3057], Nzérékoré: [7.7561, -8.8178], Nzerekore: [7.7561, -8.8178], Siguiri: [11.4174, -9.1700],
 };
 const GUINEA_CENTER: [number, number] = [10.4, -11.0];
-const GPS_ACCURACY_THRESHOLD_M = 50; // au-delà : ajout bloqué
-const GPS_ACCURACY_WARN_M = 25; // au-delà : avertissement
 const severityColor: Record<string, string> = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22c55e" };
 
 const MARKER_META: Record<string, { color: string; emoji: string; label: string; Icon: any }> = {
