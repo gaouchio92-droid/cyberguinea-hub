@@ -129,7 +129,11 @@ export default function AuthPage() {
                 <form onSubmit={signUp} className="space-y-4">
                   <div><Label>Nom complet</Label><Input required value={fullName} onChange={e => setFullName(e.target.value)} /></div>
                   <div><Label>Email</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
-                  <div><Label>Mot de passe</Label><Input type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} /></div>
+                  <div>
+                    <Label>Mot de passe</Label>
+                    <Input type="password" required minLength={10} value={password} onChange={e => setPassword(e.target.value)} />
+                    <p className="text-[11px] text-muted-foreground mt-1">Min. 10 caractères : majuscule, minuscule, chiffre, caractère spécial.</p>
+                  </div>
                   <Button className="w-full" disabled={busy}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Créer un compte</Button>
                 </form>
               </TabsContent>
