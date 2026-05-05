@@ -41,13 +41,16 @@ export default function Operators() {
 
   async function createAudit(operator_id: string) {
     if (!user) return;
+    const parsed = auditSchema.safeParse(form);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("audits").insert({
-      operator_id, framework: form.framework as any, score: form.score,
-      findings: form.findings || null, remediation_plan: form.remediation_plan || null,
+      operator_id, framework: v.framework as any, score: v.score,
+      findings: v.findings || null, remediation_plan: v.remediation_plan || null,
       auditor_id: user.id,
     });
     if (error) return toast.error(error.message);
-    await supabase.from("operators").update({ compliance_score: form.score }).eq("id", operator_id);
+    await supabase.from("operators").update({ compliance_score: v.score }).eq("id", operator_id);
     toast.success("Audit enregistré");
     setAuditOpen(null);
     setForm({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
