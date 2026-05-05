@@ -28,6 +28,10 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Users = lazy(() => import("./pages/Users"));
 const Compliance = lazy(() => import("./pages/Compliance"));
 const Exercises = lazy(() => import("./pages/Exercises"));
+const Iocs = lazy(() => import("./pages/Iocs"));
+const Bulletins = lazy(() => import("./pages/Bulletins"));
+const Maturity = lazy(() => import("./pages/Maturity"));
+const PublicAvis = lazy(() => import("./pages/PublicAvis"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
