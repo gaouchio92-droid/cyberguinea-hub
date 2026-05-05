@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import arptLogo from "@/assets/arpt-logo.png";
+import { signInSchema, signUpSchema, emailSchema, firstZodError } from "@/lib/validation";
 
 export default function AuthPage() {
   const { user, loading } = useAuth();
