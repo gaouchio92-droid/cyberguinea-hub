@@ -152,6 +152,34 @@ export default function Dashboard() {
       </div>
 
       <Card className="p-5 gradient-card">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /> Heatmap incidents (jour × heure)</h3>
+        <div className="overflow-x-auto">
+          <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: "60px repeat(24, 1fr)" }}>
+            <div />
+            {Array.from({ length: 24 }).map((_, h) => (
+              <div key={h} className="text-[9px] text-center text-muted-foreground">{h}</div>
+            ))}
+            {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map((d, di) => {
+              const max = Math.max(1, ...heatmap.flat());
+              return (
+                <>
+                  <div key={d} className="text-[10px] text-muted-foreground pr-2 self-center">{d}</div>
+                  {heatmap[di].map((v, hi) => {
+                    const intensity = v / max;
+                    return (
+                      <div key={hi} title={`${d} ${hi}h : ${v}`}
+                        className="h-5 rounded-sm border border-border/40"
+                        style={{ background: v === 0 ? "hsl(var(--muted) / 0.2)" : `hsl(var(--destructive) / ${0.2 + intensity * 0.8})` }} />
+                    );
+                  })}
+                </>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-5 gradient-card">
         <h3 className="font-semibold mb-4">Incidents récents</h3>
         <div className="space-y-2">
           {recent.map(i => (
