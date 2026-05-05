@@ -225,6 +225,8 @@ export default function Operators() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <OperatorContactsDialog operator={contactsOp} open={!!contactsOp} onOpenChange={v => !v && setContactsOp(null)} />
     </div>
   );
 }
