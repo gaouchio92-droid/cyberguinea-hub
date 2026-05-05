@@ -57,14 +57,30 @@ export default function Reports() {
     if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 300); }
   }
 
+  async function exportIncidentsCsv() {
+    const { data } = await supabase.from("incidents").select("*").order("created_at", { ascending: false });
+    const rows = [["ID","Titre","Type","Sévérité","Statut","Détecté","Résolu","Description"]];
+    (data ?? []).forEach((i: any) => {
+      rows.push([i.id, i.title, i.type, i.severity, i.status, i.detected_at ?? "", i.resolved_at ?? "", (i.description ?? "").replace(/\n/g, " ")]);
+    });
+    const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `incidents-${format(new Date(),"yyyyMMdd")}.csv`; a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export CSV téléchargé");
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Centre de Reporting"
         description="Rapports DG hebdomadaires, mensuels et exports d'incidents"
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild><Button><Sparkles className="h-4 w-4 mr-2" />Générer un rapport</Button></DialogTrigger>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={exportIncidentsCsv}><Download className="h-4 w-4 mr-2" />Export CSV incidents</Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button><Sparkles className="h-4 w-4 mr-2" />Générer un rapport</Button></DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Nouveau rapport</DialogTitle></DialogHeader>
               <div className="space-y-3">
@@ -81,6 +97,7 @@ export default function Reports() {
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         }
       />
 

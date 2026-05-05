@@ -26,6 +26,7 @@ const Assistant = lazy(() => import("./pages/Assistant"));
 const Documentation = lazy(() => import("./pages/Documentation"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Users = lazy(() => import("./pages/Users"));
+const Compliance = lazy(() => import("./pages/Compliance"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -73,6 +74,7 @@ const App = () => (
                 <Route path="/documentation" element={<Documentation />} />
                 <Route path="/system-logs" element={<SystemLogs />} />
                 <Route path="/users" element={<Users />} />
+                <Route path="/compliance" element={<Compliance />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>

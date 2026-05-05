@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Clock, Activity, Building2, AlertTriangle, TrendingUp, Radar } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { ShieldAlert, Clock, Activity, Building2, AlertTriangle, TrendingUp, Radar, ShieldCheck } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, RadialBarChart, RadialBar } from "recharts";
 import { incidentTypeLabel, severityColor, severityLabel } from "@/lib/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [recent, setRecent] = useState<any[]>([]);
   const [intel, setIntel] = useState<any[]>([]);
   const [opCount, setOpCount] = useState(0);
+  const [heatmap, setHeatmap] = useState<number[][]>(() => Array.from({ length: 7 }, () => Array(24).fill(0)));
 
   useEffect(() => { (async () => {
     const [{ data: kpis }, { data: ic }, { data: ops }, { data: it }] = await Promise.all([
@@ -64,6 +65,12 @@ export default function Dashboard() {
     setRecent((ic ?? []).slice(0, 5));
     setIntel(it ?? []);
     setOpCount((ops ?? []).length);
+    const hm = Array.from({ length: 7 }, () => Array(24).fill(0));
+    (ic ?? []).forEach((i: any) => {
+      const d = new Date(i.created_at);
+      hm[(d.getDay() + 6) % 7][d.getHours()]++;
+    });
+    setHeatmap(hm);
     const avg = ops && ops.length ? Math.round(ops.reduce((a: number, b: any) => a + (b.compliance_score ?? 0), 0) / ops.length) : 0;
     if (kpis && kpis.length) setKpi((k: any) => ({ ...(k ?? kpis[0]), operator_compliance_avg: avg }));
   })(); }, []);
@@ -143,6 +150,34 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
+
+      <Card className="p-5 gradient-card">
+        <h3 className="font-semibold mb-4 flex items-center gap-2"><Activity className="h-4 w-4 text-primary" /> Heatmap incidents (jour × heure)</h3>
+        <div className="overflow-x-auto">
+          <div className="inline-grid gap-0.5" style={{ gridTemplateColumns: "60px repeat(24, 1fr)" }}>
+            <div />
+            {Array.from({ length: 24 }).map((_, h) => (
+              <div key={h} className="text-[9px] text-center text-muted-foreground">{h}</div>
+            ))}
+            {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map((d, di) => {
+              const max = Math.max(1, ...heatmap.flat());
+              return (
+                <div key={d} className="contents">
+                  <div className="text-[10px] text-muted-foreground pr-2 self-center">{d}</div>
+                  {heatmap[di].map((v, hi) => {
+                    const intensity = v / max;
+                    return (
+                      <div key={hi} title={`${d} ${hi}h : ${v}`}
+                        className="h-5 rounded-sm border border-border/40"
+                        style={{ background: v === 0 ? "hsl(var(--muted) / 0.2)" : `hsl(var(--destructive) / ${0.2 + intensity * 0.8})` }} />
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </Card>
 
       <Card className="p-5 gradient-card">
         <h3 className="font-semibold mb-4">Incidents récents</h3>
