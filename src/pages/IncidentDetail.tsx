@@ -35,7 +35,7 @@ export default function IncidentDetail() {
     if (!id) return;
     const { data } = await supabase
       .from("incidents")
-      .select("*, operators(name, type, region, contact_email)")
+      .select("*, operators(name, type, region)")
       .eq("id", id).maybeSingle();
     setIncident(data);
     if (data?.created_by) {
