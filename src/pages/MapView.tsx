@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { mapMarkerSchema, fiberLinkSchema, operatorSchema, firstZodError } from "@/lib/validation";
+import { useGeoWatch, getCurrentGeo, GPS_ACCURACY_THRESHOLD_M, GPS_ACCURACY_WARN_M } from "@/hooks/useGeo";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
