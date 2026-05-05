@@ -151,6 +151,12 @@ export default function Incidents() {
                       <SelectContent>{operators.map(o => <SelectItem key={o.id} value={o.id}>{o.name}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
+                  <div><Label>Classification TLP</Label>
+                    <Select value={form.tlp} onValueChange={(v: TLP) => setForm({ ...form, tlp: v })}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{TLP_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label} — {o.desc}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                   <div><Label>Description</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
                   <div><Label>Notes</Label><Textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
                   <Button onClick={create} className="w-full">Créer l'incident</Button>
