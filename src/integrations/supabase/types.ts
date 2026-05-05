@@ -58,6 +58,60 @@ export type Database = {
           },
         ]
       }
+      bulletins: {
+        Row: {
+          affected_systems: string | null
+          author_id: string | null
+          body_md: string
+          created_at: string
+          cve_refs: string[]
+          id: string
+          published_at: string | null
+          recommendations: string | null
+          reference: string
+          status: Database["public"]["Enums"]["bulletin_status"]
+          summary: string | null
+          title: string
+          tlp: Database["public"]["Enums"]["tlp_level"]
+          type: Database["public"]["Enums"]["bulletin_type"]
+          updated_at: string
+        }
+        Insert: {
+          affected_systems?: string | null
+          author_id?: string | null
+          body_md: string
+          created_at?: string
+          cve_refs?: string[]
+          id?: string
+          published_at?: string | null
+          recommendations?: string | null
+          reference: string
+          status?: Database["public"]["Enums"]["bulletin_status"]
+          summary?: string | null
+          title: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
+          type: Database["public"]["Enums"]["bulletin_type"]
+          updated_at?: string
+        }
+        Update: {
+          affected_systems?: string | null
+          author_id?: string | null
+          body_md?: string
+          created_at?: string
+          cve_refs?: string[]
+          id?: string
+          published_at?: string | null
+          recommendations?: string | null
+          reference?: string
+          status?: Database["public"]["Enums"]["bulletin_status"]
+          summary?: string | null
+          title?: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
+          type?: Database["public"]["Enums"]["bulletin_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       compliance_assessments: {
         Row: {
           assessed_at: string
@@ -135,6 +189,45 @@ export type Database = {
         }
         Relationships: []
       }
+      csirt_maturity: {
+        Row: {
+          assessed_at: string
+          assessed_by: string | null
+          category: string
+          description: string | null
+          evidence: string | null
+          id: string
+          item_code: string
+          score: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assessed_at?: string
+          assessed_by?: string | null
+          category: string
+          description?: string | null
+          evidence?: string | null
+          id?: string
+          item_code: string
+          score?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assessed_at?: string
+          assessed_by?: string | null
+          category?: string
+          description?: string | null
+          evidence?: string | null
+          id?: string
+          item_code?: string
+          score?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exercise_participants: {
         Row: {
           attended: boolean | null
@@ -182,6 +275,7 @@ export type Database = {
           score: number | null
           status: Database["public"]["Enums"]["exercise_status"]
           title: string
+          tlp: Database["public"]["Enums"]["tlp_level"]
           updated_at: string
         }
         Insert: {
@@ -198,6 +292,7 @@ export type Database = {
           score?: number | null
           status?: Database["public"]["Enums"]["exercise_status"]
           title: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           updated_at?: string
         }
         Update: {
@@ -214,6 +309,7 @@ export type Database = {
           score?: number | null
           status?: Database["public"]["Enums"]["exercise_status"]
           title?: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           updated_at?: string
         }
         Relationships: []
@@ -313,6 +409,7 @@ export type Database = {
           status: Database["public"]["Enums"]["incident_status"]
           timeline: Json | null
           title: string
+          tlp: Database["public"]["Enums"]["tlp_level"]
           type: Database["public"]["Enums"]["incident_type"]
           updated_at: string
         }
@@ -336,6 +433,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["incident_status"]
           timeline?: Json | null
           title: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           type: Database["public"]["Enums"]["incident_type"]
           updated_at?: string
         }
@@ -359,6 +457,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["incident_status"]
           timeline?: Json | null
           title?: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           type?: Database["public"]["Enums"]["incident_type"]
           updated_at?: string
         }
@@ -385,6 +484,7 @@ export type Database = {
           severity: Database["public"]["Enums"]["severity"]
           source: string | null
           title: string
+          tlp: Database["public"]["Enums"]["tlp_level"]
         }
         Insert: {
           category: Database["public"]["Enums"]["intel_category"]
@@ -398,6 +498,7 @@ export type Database = {
           severity?: Database["public"]["Enums"]["severity"]
           source?: string | null
           title: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
         }
         Update: {
           category?: Database["public"]["Enums"]["intel_category"]
@@ -411,8 +512,78 @@ export type Database = {
           severity?: Database["public"]["Enums"]["severity"]
           source?: string | null
           title?: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
         }
         Relationships: []
+      }
+      iocs: {
+        Row: {
+          confidence: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          first_seen: string
+          id: string
+          incident_id: string | null
+          intel_id: string | null
+          last_seen: string
+          source: string | null
+          tags: string[]
+          tlp: Database["public"]["Enums"]["tlp_level"]
+          type: Database["public"]["Enums"]["ioc_type"]
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          first_seen?: string
+          id?: string
+          incident_id?: string | null
+          intel_id?: string | null
+          last_seen?: string
+          source?: string | null
+          tags?: string[]
+          tlp?: Database["public"]["Enums"]["tlp_level"]
+          type: Database["public"]["Enums"]["ioc_type"]
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          first_seen?: string
+          id?: string
+          incident_id?: string | null
+          intel_id?: string | null
+          last_seen?: string
+          source?: string | null
+          tags?: string[]
+          tlp?: Database["public"]["Enums"]["tlp_level"]
+          type?: Database["public"]["Enums"]["ioc_type"]
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iocs_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "iocs_intel_id_fkey"
+            columns: ["intel_id"]
+            isOneToOne: false
+            referencedRelation: "intel_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kpi_snapshots: {
         Row: {
@@ -540,6 +711,62 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_contacts: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          languages: string[]
+          notes: string | null
+          on_call_24_7: boolean
+          operator_id: string
+          pgp_fingerprint: string | null
+          phone: string | null
+          preferred_channel: string | null
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          languages?: string[]
+          notes?: string | null
+          on_call_24_7?: boolean
+          operator_id: string
+          pgp_fingerprint?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          languages?: string[]
+          notes?: string | null
+          on_call_24_7?: boolean
+          operator_id?: string
+          pgp_fingerprint?: string | null
+          phone?: string | null
+          preferred_channel?: string | null
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_contacts_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       operators: {
         Row: {
           compliance_score: number | null
@@ -636,6 +863,7 @@ export type Database = {
           generated_by: string | null
           id: string
           title: string
+          tlp: Database["public"]["Enums"]["tlp_level"]
           type: Database["public"]["Enums"]["report_type"]
         }
         Insert: {
@@ -644,6 +872,7 @@ export type Database = {
           generated_by?: string | null
           id?: string
           title: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           type: Database["public"]["Enums"]["report_type"]
         }
         Update: {
@@ -652,6 +881,7 @@ export type Database = {
           generated_by?: string | null
           id?: string
           title?: string
+          tlp?: Database["public"]["Enums"]["tlp_level"]
           type?: Database["public"]["Enums"]["report_type"]
         }
         Relationships: []
@@ -768,10 +998,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      next_bulletin_reference: {
+        Args: { _type: Database["public"]["Enums"]["bulletin_type"] }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "analyst" | "operator"
       audit_framework: "ISO27001" | "NIST" | "ARPT" | "PCI_DSS"
+      bulletin_status: "draft" | "published" | "archived"
+      bulletin_type: "alerte" | "avis" | "bulletin" | "ioc"
       compliance_framework: "ANSSI" | "NIS2" | "ISO27001" | "PCIDSS"
       compliance_status:
         | "compliant"
@@ -804,6 +1040,19 @@ export type Database = {
         | "ransomware"
         | "phishing_campaign"
         | "other"
+      ioc_type:
+        | "ipv4"
+        | "ipv6"
+        | "domain"
+        | "url"
+        | "md5"
+        | "sha1"
+        | "sha256"
+        | "email"
+        | "cve"
+        | "filename"
+        | "mutex"
+        | "other"
       log_level: "info" | "warning" | "error" | "critical" | "debug"
       map_marker_type: "incident" | "signalement" | "travaux" | "maintenance"
       operation_status:
@@ -824,6 +1073,7 @@ export type Database = {
       severity: "low" | "medium" | "high" | "critical"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status: "todo" | "in_progress" | "done"
+      tlp_level: "red" | "amber_strict" | "amber" | "green" | "clear"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -953,6 +1203,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "analyst", "operator"],
       audit_framework: ["ISO27001", "NIST", "ARPT", "PCI_DSS"],
+      bulletin_status: ["draft", "published", "archived"],
+      bulletin_type: ["alerte", "avis", "bulletin", "ioc"],
       compliance_framework: ["ANSSI", "NIS2", "ISO27001", "PCIDSS"],
       compliance_status: [
         "compliant",
@@ -990,6 +1242,20 @@ export const Constants = {
         "phishing_campaign",
         "other",
       ],
+      ioc_type: [
+        "ipv4",
+        "ipv6",
+        "domain",
+        "url",
+        "md5",
+        "sha1",
+        "sha256",
+        "email",
+        "cve",
+        "filename",
+        "mutex",
+        "other",
+      ],
       log_level: ["info", "warning", "error", "critical", "debug"],
       map_marker_type: ["incident", "signalement", "travaux", "maintenance"],
       operation_status: [
@@ -1012,6 +1278,7 @@ export const Constants = {
       severity: ["low", "medium", "high", "critical"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["todo", "in_progress", "done"],
+      tlp_level: ["red", "amber_strict", "amber", "green", "clear"],
     },
   },
 } as const

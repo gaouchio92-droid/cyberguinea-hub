@@ -28,6 +28,10 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Users = lazy(() => import("./pages/Users"));
 const Compliance = lazy(() => import("./pages/Compliance"));
 const Exercises = lazy(() => import("./pages/Exercises"));
+const Iocs = lazy(() => import("./pages/Iocs"));
+const Bulletins = lazy(() => import("./pages/Bulletins"));
+const Maturity = lazy(() => import("./pages/Maturity"));
+const PublicAvis = lazy(() => import("./pages/PublicAvis"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -61,6 +65,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/avis" element={<PublicAvis />} />
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/tasks" element={<Tasks />} />
@@ -71,6 +76,9 @@ const App = () => (
                 <Route path="/operations" element={<Operations />} />
                 <Route path="/map" element={<MapView />} />
                 <Route path="/reports" element={<Reports />} />
+                <Route path="/iocs" element={<Iocs />} />
+                <Route path="/bulletins" element={<Bulletins />} />
+                <Route path="/maturity" element={<Maturity />} />
                 <Route path="/assistant" element={<Assistant />} />
                 <Route path="/documentation" element={<Documentation />} />
                 <Route path="/system-logs" element={<SystemLogs />} />

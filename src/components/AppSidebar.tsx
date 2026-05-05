@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map, ShieldCheck, Target,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map, ShieldCheck, Target, Crosshair, FileText, Award,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -24,6 +24,8 @@ const baseItems = [
   { title: "Exercices & PCA", url: "/exercises", icon: Target },
   { title: "Cartographie", url: "/map", icon: Map },
   { title: "Centre de Reporting", url: "/reports", icon: FileBarChart },
+  { title: "Bulletins & Avis", url: "/bulletins", icon: FileText },
+  { title: "Indicateurs (IoCs)", url: "/iocs", icon: Crosshair },
   { title: "Assistant IA", url: "/assistant", icon: Sparkles },
   { title: "Documentation", url: "/documentation", icon: BookOpen },
 ];
