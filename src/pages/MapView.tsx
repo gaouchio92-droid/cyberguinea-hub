@@ -287,20 +287,24 @@ export default function MapView() {
 
   async function submitOperator() {
     if (!user) return toast.error("Vous devez être connecté");
-    if (!opForm.name.trim()) return toast.error("Nom requis");
-    const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
-    if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    const parsed = operatorSchema.safeParse({
+      ...opForm,
+      latitude: parseFloat(opForm.latitude),
+      longitude: parseFloat(opForm.longitude),
+    });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     if (opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M) {
       return toast.error(`Ajout bloqué : précision GPS ±${Math.round(opFormAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
     }
+    const v = parsed.data;
     const { error } = await supabase.from("operators").insert([{
-      name: opForm.name,
-      type: opForm.type,
-      region: opForm.region || null,
-      contact_email: opForm.contact_email || null,
-      contact_phone: opForm.contact_phone || null,
-      latitude: lat,
-      longitude: lng,
+      name: v.name,
+      type: v.type,
+      region: v.region || null,
+      contact_email: v.contact_email || null,
+      contact_phone: v.contact_phone || null,
+      latitude: v.latitude,
+      longitude: v.longitude,
     }]);
     if (error) return toast.error(error.message);
     toast.success("Opérateur ajouté");
