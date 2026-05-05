@@ -16,6 +16,7 @@ import { Building2, ShieldAlert, MapPin, AlertTriangle, Megaphone, HardHat, Wren
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { mapMarkerSchema, fiberLinkSchema, operatorSchema, firstZodError } from "@/lib/validation";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -163,15 +164,25 @@ export default function MapView() {
 
   async function submitReport() {
     if (!user) return toast.error("Vous devez être connecté");
-    const lat = parseFloat(form.latitude), lng = parseFloat(form.longitude);
-    if (!form.title || isNaN(lat) || isNaN(lng)) return toast.error("Titre + position requis");
+    const parsed = mapMarkerSchema.safeParse({
+      type: form.type,
+      title: form.title,
+      description: form.description,
+      latitude: parseFloat(form.latitude),
+      longitude: parseFloat(form.longitude),
+    });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     if (formAccuracy !== null && formAccuracy > GPS_ACCURACY_THRESHOLD_M) {
       return toast.error(`Ajout bloqué : précision GPS ±${Math.round(formAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
     }
+    const v = parsed.data;
     const { error } = await supabase.from("map_markers").insert([{
-      type: form.type as "incident" | "signalement" | "travaux" | "maintenance",
-      title: form.title, description: form.description || null,
-      latitude: lat, longitude: lng, created_by: user.id,
+      type: v.type,
+      title: v.title,
+      description: v.description || null,
+      latitude: v.latitude,
+      longitude: v.longitude,
+      created_by: user.id,
     }]);
     if (error) return toast.error(error.message);
     toast.success("Signalement enregistré");
@@ -195,13 +206,15 @@ export default function MapView() {
 
   async function submitFiberLink() {
     if (!user) return toast.error("Vous devez être connecté");
-    if (!fiberForm.name.trim()) return toast.error("Nom requis");
-    if (drawPoints.length < 2) return toast.error("Tracé invalide");
+    if (drawPoints.length < 2) return toast.error("Tracé invalide (min. 2 points)");
+    const parsed = fiberLinkSchema.safeParse(fiberForm);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("fiber_links").insert([{
-      name: fiberForm.name,
-      description: fiberForm.description || null,
-      color: fiberForm.color || "#3b82f6",
-      operator_id: fiberForm.operator_id || null,
+      name: v.name,
+      description: v.description || null,
+      color: v.color,
+      operator_id: v.operator_id || null,
       coordinates: drawPoints as any,
       created_by: user.id,
     }]);
@@ -225,13 +238,15 @@ export default function MapView() {
 
   async function saveEditFiber() {
     if (!editingFiber) return;
-    if (!editFiberForm.name.trim()) return toast.error("Nom requis");
+    const parsed = fiberLinkSchema.safeParse(editFiberForm);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
+    const v = parsed.data;
     const { error } = await supabase.from("fiber_links").update({
-      name: editFiberForm.name,
-      description: editFiberForm.description || null,
-      color: editFiberForm.color,
-      operator_id: editFiberForm.operator_id || null,
-      status: editFiberForm.status,
+      name: v.name,
+      description: v.description || null,
+      color: v.color,
+      operator_id: v.operator_id || null,
+      status: v.status,
     }).eq("id", editingFiber.id);
     if (error) return toast.error(error.message);
     toast.success("Lien fibre mis à jour");
@@ -272,20 +287,24 @@ export default function MapView() {
 
   async function submitOperator() {
     if (!user) return toast.error("Vous devez être connecté");
-    if (!opForm.name.trim()) return toast.error("Nom requis");
-    const lat = parseFloat(opForm.latitude), lng = parseFloat(opForm.longitude);
-    if (isNaN(lat) || isNaN(lng)) return toast.error("Position requise");
+    const parsed = operatorSchema.safeParse({
+      ...opForm,
+      latitude: parseFloat(opForm.latitude),
+      longitude: parseFloat(opForm.longitude),
+    });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     if (opFormAccuracy !== null && opFormAccuracy > GPS_ACCURACY_THRESHOLD_M) {
       return toast.error(`Ajout bloqué : précision GPS ±${Math.round(opFormAccuracy)} m > seuil ${GPS_ACCURACY_THRESHOLD_M} m`);
     }
+    const v = parsed.data;
     const { error } = await supabase.from("operators").insert([{
-      name: opForm.name,
-      type: opForm.type,
-      region: opForm.region || null,
-      contact_email: opForm.contact_email || null,
-      contact_phone: opForm.contact_phone || null,
-      latitude: lat,
-      longitude: lng,
+      name: v.name,
+      type: v.type,
+      region: v.region || null,
+      contact_email: v.contact_email || null,
+      contact_phone: v.contact_phone || null,
+      latitude: v.latitude,
+      longitude: v.longitude,
     }]);
     if (error) return toast.error(error.message);
     toast.success("Opérateur ajouté");

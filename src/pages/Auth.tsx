@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import arptLogo from "@/assets/arpt-logo.png";
+import { signInSchema, signUpSchema, emailSchema, firstZodError } from "@/lib/validation";
 
 export default function AuthPage() {
   const { user, loading } = useAuth();
@@ -26,8 +27,10 @@ export default function AuthPage() {
 
   async function signIn(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = signInSchema.safeParse({ email, password });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Connexion réussie");
@@ -36,10 +39,13 @@ export default function AuthPage() {
 
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = signUpSchema.safeParse({ full_name: fullName, email, password });
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
     const { error } = await supabase.auth.signUp({
-      email, password,
-      options: { emailRedirectTo: window.location.origin, data: { full_name: fullName } },
+      email: parsed.data.email,
+      password: parsed.data.password,
+      options: { emailRedirectTo: window.location.origin, data: { full_name: parsed.data.full_name } },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
@@ -60,8 +66,10 @@ export default function AuthPage() {
 
   async function forgotPassword(e: React.FormEvent) {
     e.preventDefault();
+    const parsed = emailSchema.safeParse(email);
+    if (!parsed.success) return toast.error(firstZodError(parsed.error));
     setBusy(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
@@ -121,7 +129,11 @@ export default function AuthPage() {
                 <form onSubmit={signUp} className="space-y-4">
                   <div><Label>Nom complet</Label><Input required value={fullName} onChange={e => setFullName(e.target.value)} /></div>
                   <div><Label>Email</Label><Input type="email" required value={email} onChange={e => setEmail(e.target.value)} /></div>
-                  <div><Label>Mot de passe</Label><Input type="password" required minLength={8} value={password} onChange={e => setPassword(e.target.value)} /></div>
+                  <div>
+                    <Label>Mot de passe</Label>
+                    <Input type="password" required minLength={10} value={password} onChange={e => setPassword(e.target.value)} />
+                    <p className="text-[11px] text-muted-foreground mt-1">Min. 10 caractères : majuscule, minuscule, chiffre, caractère spécial.</p>
+                  </div>
                   <Button className="w-full" disabled={busy}>{busy && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}Créer un compte</Button>
                 </form>
               </TabsContent>
