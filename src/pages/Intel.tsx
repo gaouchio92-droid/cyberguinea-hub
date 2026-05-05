@@ -25,7 +25,7 @@ export default function Intel() {
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", category: "cve", severity: "medium" as Severity, region_impact: "", source: "", description: "", recommendations: "", cve_id: "" });
+  const [form, setForm] = useState({ title: "", category: "cve", severity: "medium" as Severity, region_impact: "", source: "", description: "", recommendations: "", cve_id: "", tlp: "green" as TLP });
 
   async function load() {
     const { data } = await supabase.from("intel_items").select("*").order("published_at", { ascending: false });
@@ -39,7 +39,7 @@ export default function Intel() {
     if (error) return toast.error(error.message);
     toast.success("Item ajouté");
     setOpen(false);
-    setForm({ title: "", category: "cve", severity: "medium", region_impact: "", source: "", description: "", recommendations: "", cve_id: "" });
+    setForm({ title: "", category: "cve", severity: "medium", region_impact: "", source: "", description: "", recommendations: "", cve_id: "", tlp: "green" });
     load();
   }
 
