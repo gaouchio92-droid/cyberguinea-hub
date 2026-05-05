@@ -104,7 +104,17 @@ export default function MapView() {
     ]);
     setOperators(o ?? []); setIncidents(i ?? []); setFiberLinks(f ?? []); setMarkers(m ?? []);
   }
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => {
+    refresh();
+    const ch = supabase
+      .channel("map-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "operators" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "map_markers" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "fiber_links" }, refresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "incidents" }, refresh)
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, []);
 
   const incidentsByOperator = useMemo(() => {
     const m: Record<string, any[]> = {};
