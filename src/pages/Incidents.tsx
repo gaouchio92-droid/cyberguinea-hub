@@ -188,6 +188,7 @@ export default function Incidents() {
                   <Badge className={severityColor[i.severity as Severity]}>{severityLabel[i.severity as Severity]}</Badge>
                   <Badge variant="outline">{incidentTypeLabel[i.type as IncidentType]}</Badge>
                   <Badge variant="secondary">{incidentStatusLabel[i.status as IncidentStatus]}</Badge>
+                  {i.tlp && <TLPBadge tlp={i.tlp as TLP} />}
                 </div>
                 {i.description && <p className="text-sm text-muted-foreground mb-2">{i.description}</p>}
                 <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
