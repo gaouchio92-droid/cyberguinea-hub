@@ -162,8 +162,8 @@ export default function Dashboard() {
             {["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"].map((d, di) => {
               const max = Math.max(1, ...heatmap.flat());
               return (
-                <>
-                  <div key={d} className="text-[10px] text-muted-foreground pr-2 self-center">{d}</div>
+                <div key={d} className="contents">
+                  <div className="text-[10px] text-muted-foreground pr-2 self-center">{d}</div>
                   {heatmap[di].map((v, hi) => {
                     const intensity = v / max;
                     return (
@@ -172,7 +172,7 @@ export default function Dashboard() {
                         style={{ background: v === 0 ? "hsl(var(--muted) / 0.2)" : `hsl(var(--destructive) / ${0.2 + intensity * 0.8})` }} />
                     );
                   })}
-                </>
+                </div>
               );
             })}
           </div>
