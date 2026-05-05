@@ -120,6 +120,7 @@ export default function Intel() {
                     <Badge className={severityColor[i.severity as Severity]}>{severityLabel[i.severity as Severity]}</Badge>
                     <Badge variant="outline">{catLabel[i.category]}</Badge>
                     {i.cve_id && <Badge variant="secondary" className="font-mono text-[10px]">{i.cve_id}</Badge>}
+                    {i.tlp && <TLPBadge tlp={i.tlp as TLP} />}
                   </div>
                   <h3 className="font-semibold leading-tight">{i.title}</h3>
                 </div>
