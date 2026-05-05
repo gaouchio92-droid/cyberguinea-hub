@@ -4,8 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShieldAlert, Clock, Activity, Building2, AlertTriangle, TrendingUp, Radar } from "lucide-react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
+import { ShieldAlert, Clock, Activity, Building2, AlertTriangle, TrendingUp, Radar, ShieldCheck } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid, PieChart, Pie, Cell, Legend, RadialBarChart, RadialBar } from "recharts";
 import { incidentTypeLabel, severityColor, severityLabel } from "@/lib/types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [recent, setRecent] = useState<any[]>([]);
   const [intel, setIntel] = useState<any[]>([]);
   const [opCount, setOpCount] = useState(0);
+  const [heatmap, setHeatmap] = useState<number[][]>(() => Array.from({ length: 7 }, () => Array(24).fill(0)));
 
   useEffect(() => { (async () => {
     const [{ data: kpis }, { data: ic }, { data: ops }, { data: it }] = await Promise.all([
@@ -64,6 +65,12 @@ export default function Dashboard() {
     setRecent((ic ?? []).slice(0, 5));
     setIntel(it ?? []);
     setOpCount((ops ?? []).length);
+    const hm = Array.from({ length: 7 }, () => Array(24).fill(0));
+    (ic ?? []).forEach((i: any) => {
+      const d = new Date(i.created_at);
+      hm[(d.getDay() + 6) % 7][d.getHours()]++;
+    });
+    setHeatmap(hm);
     const avg = ops && ops.length ? Math.round(ops.reduce((a: number, b: any) => a + (b.compliance_score ?? 0), 0) / ops.length) : 0;
     if (kpis && kpis.length) setKpi((k: any) => ({ ...(k ?? kpis[0]), operator_compliance_avg: avg }));
   })(); }, []);
