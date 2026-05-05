@@ -286,11 +286,21 @@ export default function MapView() {
         description={`${operators.length} opérateurs · ${incidents.length} incidents · ${fiberLinks.length} liens fibre · ${markers.length} signalements`}
       />
 
-      <div className="flex gap-2 flex-wrap items-center">
-        {([["all","Tout"],["operators","Opérateurs"],["incidents","Incidents"],["fiber","Liens fibre"],["markers","Signalements"]] as const).map(([k,v])=>(
-          <Button key={k} size="sm" variant={layer===k?"default":"outline"} onClick={()=>setLayer(k)}>{v}</Button>
-        ))}
-        <div className="ml-auto flex gap-2 flex-wrap">
+      <Card className="p-3 gradient-card border-border">
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">Affichage</div>
+        <div className="flex gap-2 flex-wrap items-center">
+          {([["all","Tout"],["operators","Opérateurs"],["incidents","Incidents"],["fiber","Liens fibre"],["markers","Signalements"]] as const).map(([k,v])=>(
+            <Button key={k} size="sm" variant={layer===k?"default":"outline"} onClick={()=>setLayer(k)}>{v}</Button>
+          ))}
+          <Button size="sm" variant={tracking ? "default" : "outline"} onClick={() => setTracking(t => !t)} className="ml-auto">
+            <Crosshair className="h-4 w-4 mr-1" />{tracking ? "Position en direct ●" : "Me localiser"}
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="p-3 gradient-card border-primary/30">
+        <div className="text-[11px] uppercase tracking-wider text-primary font-semibold mb-2">Modification de la carte</div>
+        <div className="flex gap-2 flex-wrap items-center">
           <Button size="sm" variant={pickMode?"default":"outline"} onClick={()=>setPickMode(p=>!p)}>
             <Crosshair className="h-4 w-4 mr-1" />{pickMode?"Cliquez sur la carte…":"Choisir sur carte"}
           </Button>
@@ -299,9 +309,6 @@ export default function MapView() {
           </Button>
           <Button size="sm" variant="outline" onClick={startAddOperator}>
             <Building2 className="h-4 w-4 mr-1" />Ajouter opérateur / FAI
-          </Button>
-          <Button size="sm" variant={tracking ? "default" : "outline"} onClick={() => setTracking(t => !t)}>
-            <Crosshair className="h-4 w-4 mr-1" />{tracking ? "Position en direct ●" : "Me localiser"}
           </Button>
           <Button size="sm" variant={drawMode?"default":"outline"} onClick={startDrawFiber}>
             {drawMode ? `Terminer le tracé (${drawPoints.length} pts)` : "Tracer un lien fibre"}
@@ -317,7 +324,7 @@ export default function MapView() {
             </Button>
           )}
         </div>
-      </div>
+      </Card>
 
       <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
         {Object.entries(MARKER_META).map(([k,m])=>(
