@@ -159,6 +159,9 @@ export default function Operators() {
                   </Button>
                 </div>
               )}
+              <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
+                <Phone className="h-3 w-3 mr-2" />Contacts 24/7
+              </Button>
               <Dialog open={auditOpen === o.id} onOpenChange={v => setAuditOpen(v ? o.id : null)}>
                 <DialogTrigger asChild>
                   <Button size="sm" variant="outline" className="w-full"><FileCheck className="h-3 w-3 mr-2" />Nouvel audit</Button>
