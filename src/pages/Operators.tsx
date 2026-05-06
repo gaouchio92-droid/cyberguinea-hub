@@ -157,14 +157,25 @@ export default function Operators() {
               )}
               {(isAdmin || isAnalyst) && (
                 <div className="flex gap-2 mb-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => { setUrlDialog(o); setUrlInput(o.source_url || ""); }}>
-                    <Pencil className="h-3 w-3 mr-1" />URL
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => nav(`/operators/${o.id}/edit`)}>
+                    <Edit className="h-3 w-3 mr-1" />Modifier
                   </Button>
                   <Button size="sm" variant="outline" className="flex-1" disabled={syncing === o.id} onClick={() => syncOperator(o)}>
                     <RefreshCw className={`h-3 w-3 mr-1 ${syncing === o.id ? "animate-spin" : ""}`} />
                     {syncing === o.id ? "Sync..." : "Synchroniser"}
                   </Button>
                 </div>
+              )}
+              {isAdmin && (
+                <Button
+                  size="sm" variant="ghost" className="w-full mb-2 text-destructive hover:text-destructive"
+                  onClick={async () => {
+                    if (!confirm(`Supprimer "${o.name}" ?`)) return;
+                    const { error } = await supabase.from("operators").delete().eq("id", o.id);
+                    if (error) return toast.error(error.message);
+                    toast.success("Opérateur supprimé"); load();
+                  }}
+                ><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>
               )}
               <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
                 <Phone className="h-3 w-3 mr-2" />Contacts 24/7
