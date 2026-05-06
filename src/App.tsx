@@ -33,6 +33,8 @@ const Bulletins = lazy(() => import("./pages/Bulletins"));
 const Maturity = lazy(() => import("./pages/Maturity"));
 const PublicAvis = lazy(() => import("./pages/PublicAvis"));
 const Architecture = lazy(() => import("./pages/Architecture"));
+const SiemSources = lazy(() => import("./pages/SiemSources"));
+const OperatorForm = lazy(() => import("./pages/OperatorForm"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
