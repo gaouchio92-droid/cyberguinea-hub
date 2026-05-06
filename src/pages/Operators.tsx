@@ -19,6 +19,7 @@ import { auditSchema, firstZodError } from "@/lib/validation";
 import { OperatorContactsDialog } from "@/components/OperatorContactsDialog";
 
 export default function Operators() {
+  const nav = useNavigate();
   const { user, isAdmin, isAnalyst } = useAuth();
   const [ops, setOps] = useState<any[]>([]);
   const [audits, setAudits] = useState<Record<string, any[]>>({});
