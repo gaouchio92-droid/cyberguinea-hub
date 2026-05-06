@@ -105,10 +105,15 @@ export default function Operators() {
     <div className="space-y-6">
       <PageHeader title="Opérateurs & Audits de conformité" description={`${ops.length} entités · Référentiels ISO 27001 / NIST CSF / ARPT`} />
 
-      <div className="flex gap-2">
-        {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
-          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
-        ))}
+      <div className="flex gap-2 flex-wrap items-center justify-between">
+        <div className="flex gap-2">
+          {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
+            <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
+          ))}
+        </div>
+        {(isAdmin || isAnalyst) && (
+          <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
