@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.siem_alert_auto_incident() FROM PUBLIC, anon, authenticated;
