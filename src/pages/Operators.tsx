@@ -11,13 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil, Phone } from "lucide-react";
+import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil, Phone, Trash2, Edit } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { auditSchema, firstZodError } from "@/lib/validation";
 import { OperatorContactsDialog } from "@/components/OperatorContactsDialog";
 
 export default function Operators() {
+  const nav = useNavigate();
   const { user, isAdmin, isAnalyst } = useAuth();
   const [ops, setOps] = useState<any[]>([]);
   const [audits, setAudits] = useState<Record<string, any[]>>({});
@@ -103,10 +105,15 @@ export default function Operators() {
     <div className="space-y-6">
       <PageHeader title="Opérateurs & Audits de conformité" description={`${ops.length} entités · Référentiels ISO 27001 / NIST CSF / ARPT`} />
 
-      <div className="flex gap-2">
-        {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
-          <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
-        ))}
+      <div className="flex gap-2 flex-wrap items-center justify-between">
+        <div className="flex gap-2">
+          {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
+            <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
+          ))}
+        </div>
+        {(isAdmin || isAnalyst) && (
+          <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -150,14 +157,25 @@ export default function Operators() {
               )}
               {(isAdmin || isAnalyst) && (
                 <div className="flex gap-2 mb-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => { setUrlDialog(o); setUrlInput(o.source_url || ""); }}>
-                    <Pencil className="h-3 w-3 mr-1" />URL
+                  <Button size="sm" variant="outline" className="flex-1" onClick={() => nav(`/operators/${o.id}/edit`)}>
+                    <Edit className="h-3 w-3 mr-1" />Modifier
                   </Button>
                   <Button size="sm" variant="outline" className="flex-1" disabled={syncing === o.id} onClick={() => syncOperator(o)}>
                     <RefreshCw className={`h-3 w-3 mr-1 ${syncing === o.id ? "animate-spin" : ""}`} />
                     {syncing === o.id ? "Sync..." : "Synchroniser"}
                   </Button>
                 </div>
+              )}
+              {isAdmin && (
+                <Button
+                  size="sm" variant="ghost" className="w-full mb-2 text-destructive hover:text-destructive"
+                  onClick={async () => {
+                    if (!confirm(`Supprimer "${o.name}" ?`)) return;
+                    const { error } = await supabase.from("operators").delete().eq("id", o.id);
+                    if (error) return toast.error(error.message);
+                    toast.success("Opérateur supprimé"); load();
+                  }}
+                ><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>
               )}
               <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
                 <Phone className="h-3 w-3 mr-2" />Contacts 24/7

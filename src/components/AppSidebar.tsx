@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map, ShieldCheck, Target, Crosshair, FileText, Award, Code2,
+  LayoutDashboard, ListChecks, ShieldAlert, Radar, Building2, FileBarChart, Sparkles, LogOut, Users, BookOpen, Activity, ScrollText, Map, ShieldCheck, Target, Crosshair, FileText, Award, Code2, Radio,
 } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
@@ -60,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Administration",
     adminOnly: true,
     items: [
+      { title: "Sources SIEM/EDR", url: "/siem-sources", icon: Radio },
       { title: "Maturité CSIRT", url: "/maturity", icon: Award },
       { title: "Architecture & Code", url: "/architecture", icon: Code2 },
       { title: "Utilisateurs", url: "/users", icon: Users },

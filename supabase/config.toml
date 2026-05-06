@@ -2,3 +2,6 @@ project_id = "pnlgptkgidwquoukmzpw"
 
 [functions.ai-assistant]
 verify_jwt = false
+
+[functions.siem-ingest]
+verify_jwt = false

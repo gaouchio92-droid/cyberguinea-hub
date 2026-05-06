@@ -886,6 +886,131 @@ export type Database = {
         }
         Relationships: []
       }
+      siem_alerts: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          external_id: string | null
+          host: string | null
+          id: string
+          incident_id: string | null
+          occurred_at: string
+          raw: Json
+          severity: Database["public"]["Enums"]["severity"]
+          source_id: string
+          source_ip: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          external_id?: string | null
+          host?: string | null
+          id?: string
+          incident_id?: string | null
+          occurred_at?: string
+          raw?: Json
+          severity?: Database["public"]["Enums"]["severity"]
+          source_id: string
+          source_ip?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          external_id?: string | null
+          host?: string | null
+          id?: string
+          incident_id?: string | null
+          occurred_at?: string
+          raw?: Json
+          severity?: Database["public"]["Enums"]["severity"]
+          source_id?: string
+          source_ip?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "siem_alerts_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "siem_alerts_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "siem_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      siem_sources: {
+        Row: {
+          config: Json
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          endpoint_url: string | null
+          events_count: number
+          id: string
+          ingest_token: string
+          last_event_at: string | null
+          name: string
+          operator_id: string | null
+          severity_threshold: Database["public"]["Enums"]["severity"]
+          updated_at: string
+          vendor: Database["public"]["Enums"]["siem_vendor"]
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          endpoint_url?: string | null
+          events_count?: number
+          id?: string
+          ingest_token?: string
+          last_event_at?: string | null
+          name: string
+          operator_id?: string | null
+          severity_threshold?: Database["public"]["Enums"]["severity"]
+          updated_at?: string
+          vendor: Database["public"]["Enums"]["siem_vendor"]
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          endpoint_url?: string | null
+          events_count?: number
+          id?: string
+          ingest_token?: string
+          last_event_at?: string | null
+          name?: string
+          operator_id?: string | null
+          severity_threshold?: Database["public"]["Enums"]["severity"]
+          updated_at?: string
+          vendor?: Database["public"]["Enums"]["siem_vendor"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "siem_sources_operator_id_fkey"
+            columns: ["operator_id"]
+            isOneToOne: false
+            referencedRelation: "operators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_logs: {
         Row: {
           action: string
@@ -1071,6 +1196,7 @@ export type Database = {
       operator_type: "telecom" | "isp"
       report_type: "weekly" | "monthly" | "incident" | "audit"
       severity: "low" | "medium" | "high" | "critical"
+      siem_vendor: "wazuh" | "splunk" | "sentinel" | "crowdstrike" | "generic"
       task_priority: "low" | "medium" | "high" | "urgent"
       task_status: "todo" | "in_progress" | "done"
       tlp_level: "red" | "amber_strict" | "amber" | "green" | "clear"
@@ -1276,6 +1402,7 @@ export const Constants = {
       operator_type: ["telecom", "isp"],
       report_type: ["weekly", "monthly", "incident", "audit"],
       severity: ["low", "medium", "high", "critical"],
+      siem_vendor: ["wazuh", "splunk", "sentinel", "crowdstrike", "generic"],
       task_priority: ["low", "medium", "high", "urgent"],
       task_status: ["todo", "in_progress", "done"],
       tlp_level: ["red", "amber_strict", "amber", "green", "clear"],
