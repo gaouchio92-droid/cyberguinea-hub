@@ -60,6 +60,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: "Administration",
     adminOnly: true,
     items: [
+      { title: "Sources SIEM/EDR", url: "/siem-sources", icon: Radio },
       { title: "Maturité CSIRT", url: "/maturity", icon: Award },
       { title: "Architecture & Code", url: "/architecture", icon: Code2 },
       { title: "Utilisateurs", url: "/users", icon: Users },
