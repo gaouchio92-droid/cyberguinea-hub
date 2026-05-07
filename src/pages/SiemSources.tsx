@@ -207,8 +207,11 @@ export default function SiemSources() {
                   <div className="opacity-70 mt-1">Token :</div>
                   <div>{s.ingest_token}</div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => copyEndpoint(s)}>
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" variant="default" className="flex-1" onClick={() => testSource(s)} disabled={!s.enabled}>
+                    <PlayCircle className="h-3 w-3 mr-1" />Tester
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => copyEndpoint(s)}>
                     <Copy className="h-3 w-3 mr-1" />cURL
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => rotate(s.id)}>
