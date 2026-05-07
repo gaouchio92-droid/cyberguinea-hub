@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Copy, Radio, AlertTriangle, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Copy, Radio, AlertTriangle, RefreshCw, PlayCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
