@@ -11,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Copy, Radio, AlertTriangle, RefreshCw } from "lucide-react";
+import { Plus, Trash2, Copy, Radio, AlertTriangle, RefreshCw, PlayCircle } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -80,6 +80,49 @@ export default function SiemSources() {
     const url = `${ingestUrl}?source_id=${s.id}`;
     navigator.clipboard.writeText(`curl -X POST "${url}" \\\n  -H "x-ingest-token: ${s.ingest_token}" \\\n  -H "content-type: application/json" \\\n  -d '{"events":[{...}]}'`);
     toast.success("Commande cURL copiée");
+  }
+
+  function samplePayload(vendor: string, severity: string) {
+    switch (vendor) {
+      case "wazuh": {
+        const lvl = severity === "critical" ? 14 : severity === "high" ? 11 : severity === "medium" ? 7 : 3;
+        return { id: `test-${Date.now()}`, timestamp: new Date().toISOString(), rule: { level: lvl, description: `Test Wazuh ${severity}`, groups: ["test", "simulated"] }, agent: { name: "test-agent-01" }, data: { srcip: "10.0.0.42" }, full_log: "Simulated test event from Lovable" };
+      }
+      case "splunk":
+        return { sid: `test-${Date.now()}`, result: { search_name: `Test Splunk ${severity}`, severity, _raw: "Simulated Splunk alert", host: "test-host", src_ip: "10.0.0.43", _time: new Date().toISOString() } };
+      case "sentinel":
+        return { id: `test-${Date.now()}`, properties: { incidentNumber: 9999, title: `Test Sentinel ${severity}`, description: "Simulated Sentinel incident", severity: severity.charAt(0).toUpperCase() + severity.slice(1), createdTimeUtc: new Date().toISOString(), entities: [{ HostName: "test-host" }, { Address: "10.0.0.44" }] } };
+      case "crowdstrike": {
+        const n = severity === "critical" ? 5 : severity === "high" ? 3 : severity === "medium" ? 2 : 1;
+        return { detection_id: `test-${Date.now()}`, name: `Test CrowdStrike ${severity}`, severity: n, tactic: "Execution", description: "Simulated Falcon detection", device: { hostname: "test-host" }, network: { local_ip: "10.0.0.45" }, timestamp: new Date().toISOString() };
+      }
+      default:
+        return { id: `test-${Date.now()}`, title: `Test ${severity}`, description: "Simulated event", severity, host: "test-host", source_ip: "10.0.0.46", timestamp: new Date().toISOString() };
+    }
+  }
+
+  async function testSource(s: any) {
+    const sev = s.severity_threshold;
+    const payload = samplePayload(s.vendor, sev);
+    toast.loading("Envoi du payload de test...", { id: `test-${s.id}` });
+    try {
+      const res = await fetch(`${ingestUrl}?source_id=${s.id}`, {
+        method: "POST",
+        headers: { "x-ingest-token": s.ingest_token, "content-type": "application/json" },
+        body: JSON.stringify({ events: [payload] }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
+      const alert = json.alerts?.[0];
+      if (alert?.incident_id) {
+        toast.success(`Alerte ingérée + incident créé (sév: ${alert.severity})`, { id: `test-${s.id}` });
+      } else {
+        toast.success(`Alerte ingérée (sév: ${alert?.severity}) — pas d'incident (sous le seuil)`, { id: `test-${s.id}` });
+      }
+      load();
+    } catch (e: any) {
+      toast.error(`Échec du test : ${e.message}`, { id: `test-${s.id}` });
+    }
   }
 
   if (!isAdmin) return <Card className="p-6 text-center text-muted-foreground">Accès réservé aux administrateurs.</Card>;
@@ -164,8 +207,11 @@ export default function SiemSources() {
                   <div className="opacity-70 mt-1">Token :</div>
                   <div>{s.ingest_token}</div>
                 </div>
-                <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="flex-1" onClick={() => copyEndpoint(s)}>
+                <div className="flex gap-2 flex-wrap">
+                  <Button size="sm" variant="default" className="flex-1" onClick={() => testSource(s)} disabled={!s.enabled}>
+                    <PlayCircle className="h-3 w-3 mr-1" />Tester
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => copyEndpoint(s)}>
                     <Copy className="h-3 w-3 mr-1" />cURL
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => rotate(s.id)}>
