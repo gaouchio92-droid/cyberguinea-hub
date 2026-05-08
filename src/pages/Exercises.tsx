@@ -187,6 +187,7 @@ export default function Exercises() {
                 )}
               </div>
               {canEdit && <Button size="sm" variant="ghost" onClick={() => edit(it)}>Modifier</Button>}
+              {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(it)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
             </div>
           </Card>
         ))}
