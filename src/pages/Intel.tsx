@@ -23,6 +23,7 @@ const catLabel: Record<string, string> = {
 const catIcon: Record<string, any> = { cve: Bug, apt: ShieldAlert, ransomware: ShieldAlert, phishing_campaign: Globe, other: Radar };
 
 export default function Intel() {
+  const { isAdmin } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [open, setOpen] = useState(false);
