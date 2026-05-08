@@ -133,6 +133,7 @@ export default function Intel() {
                   </div>
                   <h3 className="font-semibold leading-tight">{i.title}</h3>
                 </div>
+                {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(i)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
               </div>
               {i.description && <p className="text-sm text-muted-foreground mb-3">{i.description}</p>}
               {i.recommendations && (
