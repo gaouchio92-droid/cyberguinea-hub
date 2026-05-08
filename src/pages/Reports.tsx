@@ -72,6 +72,13 @@ export default function Reports() {
     toast.success("Export CSV téléchargé");
   }
 
+  async function remove(r: any) {
+    if (!confirm(`Supprimer le rapport « ${r.title} » ?`)) return;
+    const { error } = await supabase.from("reports").delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    toast.success("Rapport supprimé"); load();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
