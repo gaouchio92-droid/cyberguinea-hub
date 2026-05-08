@@ -160,6 +160,7 @@ export default function Bulletins() {
                 {canWrite && <Button variant="ghost" size="sm" onClick={() => startEdit(b)}><Pencil className="h-3 w-3 mr-1" />Éditer</Button>}
                 {canWrite && b.status === "draft" && <Button variant="ghost" size="sm" onClick={() => changeStatus(b, "published")}><Send className="h-3 w-3 mr-1" />Publier</Button>}
                 {canWrite && b.status === "published" && <Button variant="ghost" size="sm" onClick={() => changeStatus(b, "archived")}><Archive className="h-3 w-3 mr-1" />Archiver</Button>}
+                {isAdmin && <Button variant="ghost" size="sm" onClick={() => remove(b)} className="text-destructive"><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>}
               </div>
             </div>
           </Card>
