@@ -104,6 +104,13 @@ export default function Bulletins() {
     toast.success("Statut mis à jour"); load();
   }
 
+  async function remove(b: any) {
+    if (!confirm(`Supprimer définitivement le bulletin ${b.reference} ?`)) return;
+    const { error } = await supabase.from("bulletins").delete().eq("id", b.id);
+    if (error) return toast.error(error.message);
+    toast.success("Bulletin supprimé"); load();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
