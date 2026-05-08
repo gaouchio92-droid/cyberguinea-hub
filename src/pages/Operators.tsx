@@ -167,6 +167,14 @@ export default function Operators() {
           return (
             <Card key={o.id} className="p-5 gradient-card hover:border-primary/40 transition-smooth">
               <div className="flex items-start gap-3 mb-3">
+                {isAdmin && (
+                  <Checkbox
+                    checked={selected.has(o.id)}
+                    onCheckedChange={() => toggleSel(o.id)}
+                    aria-label={`Sélectionner ${o.name}`}
+                    className="mt-1"
+                  />
+                )}
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="h-5 w-5 text-primary" />
                 </div>
