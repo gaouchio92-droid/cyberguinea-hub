@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil, Phone, Trash2, Edit } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Building2, Plus, FileCheck, RefreshCw, Link as LinkIcon, Pencil, Phone, Trash2, Edit, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
@@ -30,6 +31,29 @@ export default function Operators() {
   const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
   const [contactsOp, setContactsOp] = useState<{ id: string; name: string } | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  function toggleSel(id: string) {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+  async function deleteOne(o: any) {
+    if (!confirm(`Supprimer "${o.name}" ?`)) return;
+    const { error } = await supabase.from("operators").delete().eq("id", o.id);
+    if (error) return toast.error(error.message);
+    toast.success("Opérateur supprimé");
+    setSelected(prev => { const n = new Set(prev); n.delete(o.id); return n; });
+    load();
+  }
+  async function deleteBatch() {
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+    if (!confirm(`Supprimer ${ids.length} opérateur(s) sélectionné(s) ? Cette action est irréversible.`)) return;
+    const { error } = await supabase.from("operators").delete().in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`${ids.length} opérateur(s) supprimé(s)`);
+    setSelected(new Set());
+    load();
+  }
 
   async function load() {
     const [{ data: o }, { data: a }] = await Promise.all([
@@ -106,14 +130,35 @@ export default function Operators() {
       <PageHeader title="Opérateurs & Audits de conformité" description={`${ops.length} entités · Référentiels ISO 27001 / NIST CSF / ARPT`} />
 
       <div className="flex gap-2 flex-wrap items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center flex-wrap">
           {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
             <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
           ))}
+          {isAdmin && filtered.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => {
+              const allIds = filtered.map(o => o.id);
+              const allSel = allIds.every(id => selected.has(id));
+              setSelected(allSel ? new Set() : new Set(allIds));
+            }}>
+              {filtered.every(o => selected.has(o.id)) ? "Tout désélectionner" : "Tout sélectionner"}
+            </Button>
+          )}
         </div>
-        {(isAdmin || isAnalyst) && (
-          <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
-        )}
+        <div className="flex gap-2">
+          {isAdmin && selected.size > 0 && (
+            <>
+              <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                <X className="h-4 w-4 mr-1" />{selected.size} sélectionné(s)
+              </Button>
+              <Button size="sm" variant="destructive" onClick={deleteBatch}>
+                <Trash2 className="h-4 w-4 mr-1" />Supprimer la sélection
+              </Button>
+            </>
+          )}
+          {(isAdmin || isAnalyst) && (
+            <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -122,6 +167,14 @@ export default function Operators() {
           return (
             <Card key={o.id} className="p-5 gradient-card hover:border-primary/40 transition-smooth">
               <div className="flex items-start gap-3 mb-3">
+                {isAdmin && (
+                  <Checkbox
+                    checked={selected.has(o.id)}
+                    onCheckedChange={() => toggleSel(o.id)}
+                    aria-label={`Sélectionner ${o.name}`}
+                    className="mt-1"
+                  />
+                )}
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
                   <Building2 className="h-5 w-5 text-primary" />
                 </div>
@@ -169,12 +222,7 @@ export default function Operators() {
               {isAdmin && (
                 <Button
                   size="sm" variant="ghost" className="w-full mb-2 text-destructive hover:text-destructive"
-                  onClick={async () => {
-                    if (!confirm(`Supprimer "${o.name}" ?`)) return;
-                    const { error } = await supabase.from("operators").delete().eq("id", o.id);
-                    if (error) return toast.error(error.message);
-                    toast.success("Opérateur supprimé"); load();
-                  }}
+                  onClick={() => deleteOne(o)}
                 ><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>
               )}
               <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
