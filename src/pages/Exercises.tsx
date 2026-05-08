@@ -89,6 +89,13 @@ export default function Exercises() {
     setOpen(true);
   }
 
+  async function remove(it: any) {
+    if (!confirm(`Supprimer définitivement l'exercice « ${it.title} » ?`)) return;
+    const { error } = await supabase.from("exercises").delete().eq("id", it.id);
+    if (error) return toast.error(error.message);
+    toast.success("Exercice supprimé"); load();
+  }
+
   const completed = items.filter(i => i.status === "completed");
   const avgScore = completed.length
     ? Math.round(completed.reduce((a, b) => a + (b.score ?? 0), 0) / completed.length)
