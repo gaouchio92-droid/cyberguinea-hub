@@ -123,6 +123,7 @@ export default function Reports() {
                 {r.content && <p className="text-sm text-muted-foreground mt-2 line-clamp-2 whitespace-pre-line">{r.content.slice(0, 200)}…</p>}
               </div>
               <Button size="sm" variant="outline" onClick={() => exportPdf(r)}><Download className="h-3 w-3 mr-1" />PDF</Button>
+              {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(r)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
             </div>
           </Card>
         ))}
