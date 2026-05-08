@@ -31,6 +31,29 @@ export default function Operators() {
   const [syncing, setSyncing] = useState<string | null>(null);
   const [form, setForm] = useState({ framework: "ISO27001", score: 70, findings: "", remediation_plan: "" });
   const [contactsOp, setContactsOp] = useState<{ id: string; name: string } | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
+  function toggleSel(id: string) {
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  }
+  async function deleteOne(o: any) {
+    if (!confirm(`Supprimer "${o.name}" ?`)) return;
+    const { error } = await supabase.from("operators").delete().eq("id", o.id);
+    if (error) return toast.error(error.message);
+    toast.success("Opérateur supprimé");
+    setSelected(prev => { const n = new Set(prev); n.delete(o.id); return n; });
+    load();
+  }
+  async function deleteBatch() {
+    const ids = Array.from(selected);
+    if (!ids.length) return;
+    if (!confirm(`Supprimer ${ids.length} opérateur(s) sélectionné(s) ? Cette action est irréversible.`)) return;
+    const { error } = await supabase.from("operators").delete().in("id", ids);
+    if (error) return toast.error(error.message);
+    toast.success(`${ids.length} opérateur(s) supprimé(s)`);
+    setSelected(new Set());
+    load();
+  }
 
   async function load() {
     const [{ data: o }, { data: a }] = await Promise.all([
