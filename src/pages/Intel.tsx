@@ -45,6 +45,13 @@ export default function Intel() {
     load();
   }
 
+  async function remove(it: any) {
+    if (!confirm(`Supprimer « ${it.title} » ?`)) return;
+    const { error } = await supabase.from("intel_items").delete().eq("id", it.id);
+    if (error) return toast.error(error.message);
+    toast.success("Item supprimé"); load();
+  }
+
   const filtered = filter === "all" ? items : items.filter(i => i.category === filter);
 
   return (
