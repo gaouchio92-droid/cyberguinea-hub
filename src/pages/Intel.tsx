@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Radar, ShieldAlert, Bug, Globe, RefreshCw } from "lucide-react";
+import { Plus, Radar, ShieldAlert, Bug, Globe, RefreshCw, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { severityColor, severityLabel, Severity } from "@/lib/types";
 import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { format } from "date-fns";
@@ -22,6 +23,7 @@ const catLabel: Record<string, string> = {
 const catIcon: Record<string, any> = { cve: Bug, apt: ShieldAlert, ransomware: ShieldAlert, phishing_campaign: Globe, other: Radar };
 
 export default function Intel() {
+  const { isAdmin } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [open, setOpen] = useState(false);
@@ -41,6 +43,13 @@ export default function Intel() {
     setOpen(false);
     setForm({ title: "", category: "cve", severity: "medium", region_impact: "", source: "", description: "", recommendations: "", cve_id: "", tlp: "green" });
     load();
+  }
+
+  async function remove(it: any) {
+    if (!confirm(`Supprimer « ${it.title} » ?`)) return;
+    const { error } = await supabase.from("intel_items").delete().eq("id", it.id);
+    if (error) return toast.error(error.message);
+    toast.success("Item supprimé"); load();
   }
 
   const filtered = filter === "all" ? items : items.filter(i => i.category === filter);
@@ -124,6 +133,7 @@ export default function Intel() {
                   </div>
                   <h3 className="font-semibold leading-tight">{i.title}</h3>
                 </div>
+                {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(i)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
               </div>
               {i.description && <p className="text-sm text-muted-foreground mb-3">{i.description}</p>}
               {i.recommendations && (

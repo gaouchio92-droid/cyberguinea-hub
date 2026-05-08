@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
-import { CalendarClock, Plus, Target, Trophy, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { CalendarClock, Plus, Target, Trophy, AlertTriangle, CheckCircle2, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -87,6 +87,13 @@ export default function Exercises() {
       lessons_learned: it.lessons_learned ?? "", score: it.score ?? 0,
     });
     setOpen(true);
+  }
+
+  async function remove(it: any) {
+    if (!confirm(`Supprimer définitivement l'exercice « ${it.title} » ?`)) return;
+    const { error } = await supabase.from("exercises").delete().eq("id", it.id);
+    if (error) return toast.error(error.message);
+    toast.success("Exercice supprimé"); load();
   }
 
   const completed = items.filter(i => i.status === "completed");
@@ -180,6 +187,7 @@ export default function Exercises() {
                 )}
               </div>
               {canEdit && <Button size="sm" variant="ghost" onClick={() => edit(it)}>Modifier</Button>}
+              {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(it)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
             </div>
           </Card>
         ))}

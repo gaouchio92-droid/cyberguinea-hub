@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileBarChart, Plus, Download, Calendar, Sparkles } from "lucide-react";
+import { FileBarChart, Plus, Download, Calendar, Sparkles, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const typeLabel: Record<string, string> = { weekly: "Hebdomadaire", monthly: "Mensuel", incident: "Incident", audit: "Audit" };
 
 export default function Reports() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -72,6 +72,13 @@ export default function Reports() {
     toast.success("Export CSV téléchargé");
   }
 
+  async function remove(r: any) {
+    if (!confirm(`Supprimer le rapport « ${r.title} » ?`)) return;
+    const { error } = await supabase.from("reports").delete().eq("id", r.id);
+    if (error) return toast.error(error.message);
+    toast.success("Rapport supprimé"); load();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -116,6 +123,7 @@ export default function Reports() {
                 {r.content && <p className="text-sm text-muted-foreground mt-2 line-clamp-2 whitespace-pre-line">{r.content.slice(0, 200)}…</p>}
               </div>
               <Button size="sm" variant="outline" onClick={() => exportPdf(r)}><Download className="h-3 w-3 mr-1" />PDF</Button>
+              {isAdmin && <Button size="icon" variant="ghost" onClick={() => remove(r)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>}
             </div>
           </Card>
         ))}

@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
-import { Plus, FileText, Send, Archive, Eye, Pencil, Search, ExternalLink } from "lucide-react";
+import { Plus, FileText, Send, Archive, Eye, Pencil, Search, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
@@ -104,6 +104,13 @@ export default function Bulletins() {
     toast.success("Statut mis à jour"); load();
   }
 
+  async function remove(b: any) {
+    if (!confirm(`Supprimer définitivement le bulletin ${b.reference} ?`)) return;
+    const { error } = await supabase.from("bulletins").delete().eq("id", b.id);
+    if (error) return toast.error(error.message);
+    toast.success("Bulletin supprimé"); load();
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -153,6 +160,7 @@ export default function Bulletins() {
                 {canWrite && <Button variant="ghost" size="sm" onClick={() => startEdit(b)}><Pencil className="h-3 w-3 mr-1" />Éditer</Button>}
                 {canWrite && b.status === "draft" && <Button variant="ghost" size="sm" onClick={() => changeStatus(b, "published")}><Send className="h-3 w-3 mr-1" />Publier</Button>}
                 {canWrite && b.status === "published" && <Button variant="ghost" size="sm" onClick={() => changeStatus(b, "archived")}><Archive className="h-3 w-3 mr-1" />Archiver</Button>}
+                {isAdmin && <Button variant="ghost" size="sm" onClick={() => remove(b)} className="text-destructive"><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>}
               </div>
             </div>
           </Card>
