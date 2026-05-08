@@ -17,7 +17,7 @@ import { toast } from "sonner";
 const typeLabel: Record<string, string> = { weekly: "Hebdomadaire", monthly: "Mensuel", incident: "Incident", audit: "Audit" };
 
 export default function Reports() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
