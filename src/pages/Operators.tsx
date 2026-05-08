@@ -222,12 +222,7 @@ export default function Operators() {
               {isAdmin && (
                 <Button
                   size="sm" variant="ghost" className="w-full mb-2 text-destructive hover:text-destructive"
-                  onClick={async () => {
-                    if (!confirm(`Supprimer "${o.name}" ?`)) return;
-                    const { error } = await supabase.from("operators").delete().eq("id", o.id);
-                    if (error) return toast.error(error.message);
-                    toast.success("Opérateur supprimé"); load();
-                  }}
+                  onClick={() => deleteOne(o)}
                 ><Trash2 className="h-3 w-3 mr-1" />Supprimer</Button>
               )}
               <Button size="sm" variant="outline" className="w-full mb-2" onClick={() => setContactsOp({ id: o.id, name: o.name })}>
