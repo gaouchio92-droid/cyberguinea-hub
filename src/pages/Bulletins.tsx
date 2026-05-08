@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
-import { Plus, FileText, Send, Archive, Eye, Pencil, Search, ExternalLink } from "lucide-react";
+import { Plus, FileText, Send, Archive, Eye, Pencil, Search, ExternalLink, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
