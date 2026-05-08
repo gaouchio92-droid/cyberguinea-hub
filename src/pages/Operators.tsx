@@ -130,14 +130,35 @@ export default function Operators() {
       <PageHeader title="Opérateurs & Audits de conformité" description={`${ops.length} entités · Référentiels ISO 27001 / NIST CSF / ARPT`} />
 
       <div className="flex gap-2 flex-wrap items-center justify-between">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center flex-wrap">
           {[["all", "Tous"], ["telecom", "Télécoms"], ["isp", "FAI / ISP"]].map(([k, v]) => (
             <Button key={k} size="sm" variant={filter === k ? "default" : "outline"} onClick={() => setFilter(k)}>{v}</Button>
           ))}
+          {isAdmin && filtered.length > 0 && (
+            <Button size="sm" variant="ghost" onClick={() => {
+              const allIds = filtered.map(o => o.id);
+              const allSel = allIds.every(id => selected.has(id));
+              setSelected(allSel ? new Set() : new Set(allIds));
+            }}>
+              {filtered.every(o => selected.has(o.id)) ? "Tout désélectionner" : "Tout sélectionner"}
+            </Button>
+          )}
         </div>
-        {(isAdmin || isAnalyst) && (
-          <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
-        )}
+        <div className="flex gap-2">
+          {isAdmin && selected.size > 0 && (
+            <>
+              <Button size="sm" variant="ghost" onClick={() => setSelected(new Set())}>
+                <X className="h-4 w-4 mr-1" />{selected.size} sélectionné(s)
+              </Button>
+              <Button size="sm" variant="destructive" onClick={deleteBatch}>
+                <Trash2 className="h-4 w-4 mr-1" />Supprimer la sélection
+              </Button>
+            </>
+          )}
+          {(isAdmin || isAnalyst) && (
+            <Button size="sm" onClick={() => nav("/operators/new")}><Plus className="h-4 w-4 mr-1" />Nouvel opérateur</Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
