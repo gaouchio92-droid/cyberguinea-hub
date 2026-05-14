@@ -83,9 +83,15 @@ export default function Dashboard() {
     ]);
 
     if (kpis && kpis.length) setKpi(kpis[0]);
+    const threatScore: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
     setTrend((kpis ?? []).slice().reverse().map(k => ({
       date: format(new Date(k.snapshot_date), "dd/MM"),
-      ouverts: k.incidents_open, résolus: k.incidents_resolved,
+      ouverts: k.incidents_open,
+      résolus: k.incidents_resolved,
+      volume: (k.incidents_open ?? 0) + (k.incidents_resolved ?? 0),
+      mttd: k.mttd_minutes ?? 0,
+      mttr: Math.round((k.mttr_minutes ?? 0) / 60),
+      menace: threatScore[k.threat_level ?? "medium"] ?? 2,
     })));
 
     const ti: Record<string, number> = {}; const sv: Record<string, number> = {};
