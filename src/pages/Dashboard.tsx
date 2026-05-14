@@ -83,9 +83,15 @@ export default function Dashboard() {
     ]);
 
     if (kpis && kpis.length) setKpi(kpis[0]);
+    const threatScore: Record<string, number> = { low: 1, medium: 2, high: 3, critical: 4 };
     setTrend((kpis ?? []).slice().reverse().map(k => ({
       date: format(new Date(k.snapshot_date), "dd/MM"),
-      ouverts: k.incidents_open, résolus: k.incidents_resolved,
+      ouverts: k.incidents_open,
+      résolus: k.incidents_resolved,
+      volume: (k.incidents_open ?? 0) + (k.incidents_resolved ?? 0),
+      mttd: k.mttd_minutes ?? 0,
+      mttr: Math.round((k.mttr_minutes ?? 0) / 60),
+      menace: threatScore[k.threat_level ?? "medium"] ?? 2,
     })));
 
     const ti: Record<string, number> = {}; const sv: Record<string, number> = {};
@@ -225,7 +231,67 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Tendances MTTD/MTTR · volume incidents · niveau menace */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="p-5 gradient-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold flex items-center gap-2"><Clock className="h-4 w-4 text-secondary" /> MTTD / MTTR (14 j)</h3>
+            <Badge variant="outline" className="text-[10px]">min · h</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={trend}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <YAxis yAxisId="l" stroke="hsl(var(--secondary))" fontSize={11} />
+              <YAxis yAxisId="r" orientation="right" stroke="hsl(var(--primary))" fontSize={11} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+              <Legend />
+              <Line yAxisId="l" type="monotone" dataKey="mttd" name="MTTD (min)" stroke="hsl(var(--secondary))" strokeWidth={2} dot={false} />
+              <Line yAxisId="r" type="monotone" dataKey="mttr" name="MTTR (h)" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card className="p-5 gradient-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> Volume d'incidents</h3>
+            <Badge variant="outline" className="text-[10px]">cumul / jour</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={trend}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+              <Bar dataKey="volume" name="Incidents" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card className="p-5 gradient-card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" /> Niveau de menace</h3>
+            <Badge variant="outline" className="text-[10px]">1=Faible · 4=Critique</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={trend}>
+              <defs>
+                <linearGradient id="gThreat" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--warning))" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <YAxis domain={[0, 4]} ticks={[1, 2, 3, 4]} stroke="hsl(var(--muted-foreground))" fontSize={11} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+              <Area type="stepAfter" dataKey="menace" stroke="hsl(var(--warning))" fill="url(#gThreat)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
       <div className="grid gap-4 lg:grid-cols-2">
+
         <Card className="p-5 gradient-card">
           <h3 className="font-semibold mb-4">Incidents par type</h3>
           <ResponsiveContainer width="100%" height={240}>
