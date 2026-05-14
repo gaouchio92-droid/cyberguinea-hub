@@ -290,7 +290,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </Card>
       </div>
-
+      <div className="grid gap-4 lg:grid-cols-2">
 
         <Card className="p-5 gradient-card">
           <h3 className="font-semibold mb-4">Incidents par type</h3>
