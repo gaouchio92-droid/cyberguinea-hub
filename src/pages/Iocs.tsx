@@ -15,6 +15,7 @@ import { TLPBadge, TLP_OPTIONS, TLP } from "@/components/TLPBadge";
 import { Plus, Search, Download, Trash2, Crosshair, Hash, Globe, Mail, Bug, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { canExportIocs } from "@/lib/ioc-export";
 
 type IocType = "ipv4"|"ipv6"|"domain"|"url"|"md5"|"sha1"|"sha256"|"email"|"cve"|"filename"|"mutex"|"other";
 
@@ -31,6 +32,8 @@ export default function Iocs() {
   const { user, isAdmin, isAnalyst } = useAuth();
   const canWrite = isAdmin || isAnalyst;
   const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [tlpFilter, setTlpFilter] = useState<string>("all");
@@ -38,10 +41,20 @@ export default function Iocs() {
   const [form, setForm] = useState({ type: "ipv4" as IocType, value: "", confidence: 70, tlp: "amber" as TLP, tags: "", source: "", description: "" });
 
   async function load() {
-    const { data } = await supabase.from("iocs").select("*").order("created_at", { ascending: false }).limit(500);
-    setItems(data ?? []);
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const { data, error } = await supabase.from("iocs").select("*").order("created_at", { ascending: false }).limit(500);
+      if (error) throw error;
+      setItems(data ?? []);
+    } catch {
+      setLoadError("Impossible de charger les indicateurs. Réessayez avant d’exporter.");
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }
-  useEffect(() => { load(); }, []);
+  useEffect(() => { if (user) void load(); }, [user?.id]);
 
   const filtered = useMemo(() => items.filter(i => {
     if (typeFilter !== "all" && i.type !== typeFilter) return false;
@@ -49,6 +62,13 @@ export default function Iocs() {
     if (q && !`${i.value} ${i.source ?? ""} ${(i.tags ?? []).join(" ")} ${i.description ?? ""}`.toLowerCase().includes(q.toLowerCase())) return false;
     return true;
   }), [items, q, typeFilter, tlpFilter]);
+  const exportDisabled = !canExportIocs(filtered.length, loading, loadError);
+
+  function checkExport() {
+    if (!exportDisabled) return true;
+    toast.error(loadError ?? (loading ? "Chargement des indicateurs en cours." : "Aucun indicateur à exporter. Ajoutez un IoC ou modifiez les filtres."));
+    return false;
+  }
 
   async function create() {
     if (!user || !form.value.trim()) return;
@@ -72,6 +92,7 @@ export default function Iocs() {
   }
 
   function exportMisp() {
+    if (!checkExport()) return;
     const event = {
       Event: {
         info: `ARPT-CERT export ${format(new Date(), "yyyy-MM-dd HH:mm")}`,
@@ -90,6 +111,7 @@ export default function Iocs() {
   }
 
   function exportStix() {
+    if (!checkExport()) return;
     const objects = filtered.map(i => ({
       type: "indicator", spec_version: "2.1", id: `indicator--${i.id}`,
       created: i.created_at, modified: i.updated_at,
@@ -103,6 +125,7 @@ export default function Iocs() {
   }
 
   function exportCsv() {
+    if (!checkExport()) return;
     const rows = [["Type","Valeur","Confidence","TLP","Tags","Source","Description","Premier vu","Dernier vu"]];
     filtered.forEach(i => rows.push([i.type, i.value, String(i.confidence), i.tlp, (i.tags ?? []).join("|"), i.source ?? "", i.description ?? "", i.first_seen, i.last_seen]));
     const csv = rows.map(r => r.map(c => `"${String(c ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -116,9 +139,9 @@ export default function Iocs() {
         description="Gestion centralisée des IoCs · export MISP / STIX 2.1 / CSV"
         action={
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={exportCsv}><Download className="h-3 w-3 mr-1" />CSV</Button>
-            <Button variant="outline" size="sm" onClick={exportMisp}><Download className="h-3 w-3 mr-1" />MISP</Button>
-            <Button variant="outline" size="sm" onClick={exportStix}><Download className="h-3 w-3 mr-1" />STIX</Button>
+            <Button variant="outline" size="sm" disabled={exportDisabled} onClick={exportCsv}><Download className="h-3 w-3 mr-1" />CSV</Button>
+            <Button variant="outline" size="sm" disabled={exportDisabled} onClick={exportMisp}><Download className="h-3 w-3 mr-1" />MISP</Button>
+            <Button variant="outline" size="sm" disabled={exportDisabled} onClick={exportStix}><Download className="h-3 w-3 mr-1" />STIX</Button>
             {canWrite && (
               <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" />Nouvel IoC</Button></DialogTrigger>
@@ -209,7 +232,9 @@ export default function Iocs() {
               </div>
             );
           })}
-          {filtered.length === 0 && <div className="p-12 text-center text-muted-foreground">Aucun IoC</div>}
+          {loading && <div className="p-12 text-center text-muted-foreground" role="status">Chargement des indicateurs…</div>}
+          {loadError && <div className="p-12 text-center space-y-3" role="alert"><p className="text-destructive">{loadError}</p><Button variant="outline" onClick={() => void load()}>Réessayer</Button></div>}
+          {!loading && !loadError && filtered.length === 0 && <div className="p-12 text-center text-muted-foreground">{items.length === 0 ? "Aucun indicateur enregistré." : "Aucun indicateur ne correspond aux filtres."}</div>}
         </div>
       </Card>
     </div>
